@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 
 void main() {
@@ -10,23 +11,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData.dark(),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
-}
-
+}*/
+/*
 //-----
 
 class MyHomePage extends StatefulWidget {
@@ -110,6 +100,86 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}*/
+///------------------------------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+
+void main() => runApp(new MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Weather App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+          backgroundColor: Colors.lightBlueAccent,
+          appBar: AppBar(
+            title: Text('Laundry Rack App'),
+          ),
+          body: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Center(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconButton(
+                           icon: Image.network('https://image.flaticon.com/icons/png/512/2230/2230786.png'),
+                              iconSize: 70.0,
+                              tooltip: 'Refresh',
+                            onPressed: () => null,
+                             color: Colors.white,
+                          ),
+                      )
+                    ]
+                  )
+              ),
+              Center(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconButton(
+                            icon: Image.network('https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
+                            iconSize: 70.0,
+                            tooltip: 'Refresh',
+                            onPressed: () => null,
+                            color: Colors.white,
+                          ),
+                        )
+                      ]
+                  )
+              ),
+              Center(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconButton(
+                            icon: Image.network('https://cdn3.iconfinder.com/data/icons/summer-189/64/sun_bright_sunlight-512.png'),
+                            iconSize: 70.0,
+                            tooltip: 'Refresh',
+                            onPressed: () => null,
+                            color: Colors.white,
+
+                          ),
+                        )
+                      ]
+                  )
+              ),
+            ],
+          )
+      ),
     );
   }
 }
