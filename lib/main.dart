@@ -202,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
           colorOff: Colors.redAccent,
           iconOn: Icons.power_settings_new,
           iconOff: Icons.power_settings_new,
-          onChanged: (bool position) =>  SetDataBase(position),
+          onChanged: (bool position) =>  SetCover(position),
         ),
         // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
       ),
@@ -210,16 +210,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-void SetDataBase(bool position){
+void SetCover(bool position){
   final databaseReference = FirebaseDatabase.instance.reference();
   if(position) {
-    databaseReference.set({
-      'Covered': 'Yes'
+    databaseReference.child('Cover').set({
+      'Status': 'Yes'
     });
   }
   else{
-    databaseReference.set({
-      'Covered': 'No'
+    databaseReference.child('Cover').set({
+      'Status': 'No'
     });
   }
 }
