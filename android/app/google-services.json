@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "787632877766",
+    "firebase_url": "https://test-edfab-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "test-edfab",
+    "storage_bucket": "test-edfab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:787632877766:android:de283a905ef5c452f6e7c7",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "787632877766-hv5tifpnjtasihq0j2j1dadocvfnhtu8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh0eG-gSLyq6TtpY_tFzEjszkjRBmpBNI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "787632877766-hv5tifpnjtasihq0j2j1dadocvfnhtu8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "787632877766-40kkg65tm0kpsvgidst8nidkjr6cndlk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.test2esp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:787632877766:android:49ec69759d143db5f6e7c7",
+        "android_client_info": {
+          "package_name": "com.example.test2esp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "787632877766-hv5tifpnjtasihq0j2j1dadocvfnhtu8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh0eG-gSLyq6TtpY_tFzEjszkjRBmpBNI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "787632877766-hv5tifpnjtasihq0j2j1dadocvfnhtu8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "787632877766-40kkg65tm0kpsvgidst8nidkjr6cndlk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.test2esp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
