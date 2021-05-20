@@ -2,7 +2,25 @@
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
 
-void main() => runApp(new MyHomePage());
+void main() => runApp(new MyApp());
+
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var routes = <String, WidgetBuilder>{
+      MyItemsPage.routeName: (BuildContext context) => new MyItemsPage(title: "MyItemsPage"),
+    };
+    return new MaterialApp(
+      title: 'Laundry Rack App',
+      theme: new ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: new MyHomePage(title: 'Laundry Rack Home Page'),
+      routes: routes,
+    );
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -14,26 +32,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-
 //  class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Weather App',
+      title: 'Laundry Rack App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -97,8 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: IconButton(
                             icon: Image.network('https://cdn3.iconfinder.com/data/icons/summer-189/64/sun_bright_sunlight-512.png'),
                             iconSize: 70.0,
-                            tooltip: 'Refresh',
-                            onPressed: () => null,
+                            tooltip: 'Weather Forecast',
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => WeatherPage()));
+                            },
                             color: Colors.white,
 
                           ),
@@ -201,5 +206,76 @@ class _MyHomePageState extends State<MyHomePage> {
         ), // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
       ),
     );
+  }
+}
+
+class WeatherPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Weather Forecast Page'),
+        backgroundColor: Colors.lightBlueAccent,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Click button to back to Main Page'),
+            RaisedButton(
+              color: Colors.lightBlueAccent,
+                onPressed: () {
+                  Navigator.pop(context);
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class MyItemsPage extends StatefulWidget {
+  MyItemsPage({Key key, this.title}) : super(key: key);
+
+  static const String routeName = "/MyItemsPage";
+
+  final String title;
+
+  @override
+  _MyItemsPageState createState() => new _MyItemsPageState();
+}
+
+class _MyItemsPageState extends State<MyItemsPage> {
+  @override
+  Widget build(BuildContext context) {
+    var button = new IconButton(icon: new Icon(Icons.arrow_back), onPressed: _onButtonPressed);
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text(widget.title),
+      ),
+      body: new Container(
+        child: new Column(
+          children: <Widget>[
+            new Text('Item1'),
+            new Text('Item2'),
+            button
+          ],
+        ),
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: _onFloatingActionButtonPressed,
+        tooltip: 'Add',
+        child: new Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _onFloatingActionButtonPressed() {
+  }
+
+  void _onButtonPressed() {
+    Navigator.pop(context);
   }
 }
