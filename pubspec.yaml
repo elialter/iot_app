@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   lite_rolling_switch: ^0.1.1
+  firebase_database: ^3.1.6
+  firebase_core: ^0.4.4+3
 
 
   # The following adds the Cupertino Icons font to your application.

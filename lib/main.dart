@@ -1,6 +1,7 @@
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 void main() => runApp(new MyHomePage());
 
@@ -32,15 +33,20 @@ class _MyHomePageState extends State<MyHomePage> {
 //  class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    //add objects to database
+    databaseReference.child("Cover").set({
+      'Status': 'closed'
+    });
     return MaterialApp(
       title: 'Flutter Weather App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
       ),
       home: Scaffold(
-          backgroundColor: Colors.lightBlueAccent,
+          backgroundColor: Colors.white54,
           appBar: AppBar(
-            title: Text('Laundry Rack App'),
+            title: Text('            Smart Line'),
             actions: [
               Icon(Icons.favorite),
               Padding(
@@ -196,10 +202,24 @@ class _MyHomePageState extends State<MyHomePage> {
           colorOff: Colors.redAccent,
           iconOn: Icons.power_settings_new,
           iconOff: Icons.power_settings_new,
-          onChanged: (bool position) => {print("position is $position")},
-
-        ), // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
+          onChanged: (bool position) =>  SetDataBase(position),
+        ),
+        // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
       ),
     );
+  }
+}
+
+void SetDataBase(bool position){
+  final databaseReference = FirebaseDatabase.instance.reference();
+  if(position) {
+    databaseReference.set({
+      'Covered': 'Yes'
+    });
+  }
+  else{
+    databaseReference.set({
+      'Covered': 'No'
+    });
   }
 }
