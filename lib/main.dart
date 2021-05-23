@@ -228,13 +228,14 @@ void SetCover(bool position){
     });
   }
 }
+
 class WeatherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Weather Forecast Page'),
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: Colors.white54,
       ),
       body: Center(
         child: Column(
@@ -242,7 +243,7 @@ class WeatherPage extends StatelessWidget {
           children: <Widget>[
             Text('Click button to back to Main Page'),
             RaisedButton(
-              color: Colors.lightBlueAccent,
+              color: Colors.teal,
                 onPressed: () {
                   Navigator.pop(context);
               },
@@ -253,7 +254,6 @@ class WeatherPage extends StatelessWidget {
     );
   }
 }
-
 
 class MyItemsPage extends StatefulWidget {
   MyItemsPage({Key key, this.title}) : super(key: key);
