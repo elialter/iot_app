@@ -1,10 +1,14 @@
+import 'dart:io';
+
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
+//import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 import 'package:flutter_app2/lib/Weather.dart';
 import 'package:flutter_app2/lib/WeatherItem.dart';
@@ -251,28 +255,33 @@ class WeatherPage extends StatefulWidget {
   final String title;
 
   @override
-  _WeatherPage createState() => new _WeatherPage();
+  //_WeatherPage createState() => new _WeatherPage();
+  State<StatefulWidget> createState() {
+    return new _WeatherPage();
+  }
 }
+
 
 class _WeatherPage extends State<WeatherPage> {
 
   bool isLoading = false;
-  WeatherData weatherData;
-  ForecastData forecastData;
+  WeatherData weatherData;//=WeatherData();
+  ForecastData forecastData;//=ForecastData();
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
-
     loadWeather();
   }
 
   @override
   Widget build(BuildContext context) {
+    //loadWeather();
+    sleep(Duration(seconds : 2));
     return Scaffold(
       appBar: AppBar(
         title: Text('Weather Forecast Page'),
-        backgroundColor: Colors.white54,
+        backgroundColor: Colors.teal,
       ),
         body: Center(
             child: Column(
@@ -290,12 +299,12 @@ class _WeatherPage extends State<WeatherPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: isLoading ? CircularProgressIndicator(
                             strokeWidth: 2.0,
-                            valueColor: new AlwaysStoppedAnimation(Colors.white),
+                            valueColor: new AlwaysStoppedAnimation(Colors.purple),
                           ) : IconButton(
                             icon: new Icon(Icons.refresh),
                             tooltip: 'Refresh',
                             onPressed: loadWeather,
-                            color: Colors.white,
+                            color: Colors.green,
                           ),
                         ),
                       ],
@@ -336,11 +345,14 @@ class _WeatherPage extends State<WeatherPage> {
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
       return setState(() {
-        weatherData = new WeatherData.fromJson(jsonDecode(weatherResponse.body));
-        forecastData = new ForecastData.fromJson(jsonDecode(forecastResponse.body));
+        var json = jsonDecode(weatherResponse.body);
+        weatherData = new WeatherData.fromJson(json['list'][0], json['city']['name']);
+        forecastData = new ForecastData.fromJson(json);
         isLoading = false;
       });
     }
+
+
 
     setState(() {
       isLoading = false;

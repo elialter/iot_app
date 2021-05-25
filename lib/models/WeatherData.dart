@@ -7,10 +7,10 @@ class WeatherData {
 
   WeatherData({this.date, this.name, this.temp, this.main, this.icon});
 
-  factory WeatherData.fromJson(Map<String, dynamic> json) {
+  factory WeatherData.fromJson(Map<String, dynamic> json,String name) {
     return WeatherData(
-      date: new DateTime.fromMillisecondsSinceEpoch(json['dt'] * 1000, isUtc: false),
-      name: json['name'],
+      date: new DateTime.fromMillisecondsSinceEpoch(json['dt'] * 1000 , isUtc: false),
+      name: name,
       temp: json['main']['temp'].toDouble(),
       main: json['weather'][0]['main'],
       icon: json['weather'][0]['icon'],

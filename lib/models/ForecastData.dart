@@ -6,7 +6,7 @@ class ForecastData {
   ForecastData({this.list});
 
   factory ForecastData.fromJson(Map<String, dynamic> json) {
-    List list = new List();
+    List clist = new List();
 
     for (dynamic e in json['list']) {
       WeatherData w = new WeatherData(
@@ -15,11 +15,11 @@ class ForecastData {
           temp: e['main']['temp'].toDouble(),
           main: e['weather'][0]['main'],
           icon: e['weather'][0]['icon']);
-      list.add(w);
+      clist.add(w);
     }
 
     return ForecastData(
-      list: list,
+      list: clist,
     );
   }
 }
