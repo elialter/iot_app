@@ -11,7 +11,7 @@ class WeatherData {
     return WeatherData(
       date: new DateTime.fromMillisecondsSinceEpoch(json['dt'] * 1000 , isUtc: false),
       name: name,
-      temp: json['main']['temp'].toDouble(),
+      temp: json['main']['temp'].toDouble() - 273.15,
       main: json['weather'][0]['main'],
       icon: json['weather'][0]['icon'],
     );

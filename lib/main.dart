@@ -89,7 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
                            icon: Image.network('https://image.flaticon.com/icons/png/512/2230/2230786.png'),
                               iconSize: 70.0,
                               tooltip: 'Refresh',
-                            onPressed: () => null,
+                            onPressed:  () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => MyBasketItemPage()));
+                            },
                              color: Colors.white,
                           ),
                       )
@@ -254,6 +256,9 @@ class WeatherPage extends StatefulWidget {
 
   final String title;
 
+//  @override
+//  _WeatherPage createState() => new _WeatherPage();
+
   @override
   //_WeatherPage createState() => new _WeatherPage();
   State<StatefulWidget> createState() {
@@ -263,7 +268,6 @@ class WeatherPage extends StatefulWidget {
 
 
 class _WeatherPage extends State<WeatherPage> {
-
   bool isLoading = false;
   WeatherData weatherData;//=WeatherData();
   ForecastData forecastData;//=ForecastData();
@@ -280,7 +284,7 @@ class _WeatherPage extends State<WeatherPage> {
     sleep(Duration(seconds : 2));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather Forecast Page'),
+        title: Text('Weather Forecast'),
         backgroundColor: Colors.teal,
       ),
         body: Center(
@@ -404,4 +408,59 @@ class _MyItemsPageState extends State<MyItemsPage> {
     Navigator.pop(context);
   }
 }
+
+
+class MyBasketItemPage extends StatefulWidget {
+  MyBasketItemPage({Key key, this.title}) : super(key: key);
+
+  static const String routeName = "/MyBasketItemPage";
+
+  final String title;
+
+  @override
+  _MyBasketItemPage createState() => new _MyBasketItemPage();
+}
+
+class _MyBasketItemPage extends State<MyBasketItemPage> {
+  var basketStatus = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: AppBar(
+        title: Text('Basket Status'),
+        backgroundColor: Colors.teal,
+      ),
+      body: new Container(
+        child: new Column(
+            children: <Widget>[
+              Image.asset(ShowBasketStatus())
+            ]
+        ),
+      ),
+    );
+  }
+  String ShowBasketStatus(){
+    if (basketStatus == 0){
+      return "images/emptyBasket.png";
+    }
+    if (basketStatus == 1){
+      return "images/yellowBasket.png";
+    }
+    if (basketStatus == 2){
+      return "images/orangeBasket.png";
+    }
+    if (basketStatus == 3){
+      return "images/redBasket.png";
+    }
+
+  }
+}
+
+
+
+
+
+
+
 
