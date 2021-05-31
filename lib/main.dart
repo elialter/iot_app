@@ -14,6 +14,8 @@ import 'package:flutter_app2/lib/Weather.dart';
 import 'package:flutter_app2/lib/WeatherItem.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
 import 'package:flutter_app2/models/ForecastData.dart';
+import 'package:flutter_app2/models/WeatherDescriptionList.dart';
+
 
 
 void main() => runApp(new MyApp());
@@ -51,6 +53,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 //  class MyApp extends StatelessWidget {
   @override
+  bool isLoading = false;
+  WeatherDescriptionList weatherList;
+
+  void initState() {
+    super.initState();
+    loadWeather();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final databaseReference = FirebaseDatabase.instance.reference();
     //add objects to database
@@ -58,12 +69,12 @@ class _MyHomePageState extends State<MyHomePage> {
       'Status': 'closed'
     });
     return MaterialApp(
-      title: 'Laundry Rack App',
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-      ),
-      home: Scaffold(
-          backgroundColor: Colors.white54,
+        title: 'Laundry Rack App',
+        theme: ThemeData(
+          primarySwatch: Colors.teal,
+        ),
+        home: Scaffold(
+          backgroundColor: Colors.tealAccent,
           appBar: AppBar(
             title: Text('            Smart Line'),
             actions: [
@@ -75,165 +86,230 @@ class _MyHomePageState extends State<MyHomePage> {
               Icon(Icons.more_vert),
             ],
           ),
-          body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Center(
-                  child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: IconButton(
-                           icon: Image.network('https://image.flaticon.com/icons/png/512/2230/2230786.png'),
-                              iconSize: 70.0,
-                              tooltip: 'Refresh',
-                            onPressed:  () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => MyBasketItemPage()));
-                            },
-                             color: Colors.white,
-                          ),
-                      )
-                    ]
-                  )
-              ),
-              Center(
-                  child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: IconButton(
-                            icon: Image.network('https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
-                            iconSize: 70.0,
-                            tooltip: 'Refresh',
-                            onPressed: () => null,
-                            color: Colors.white,
-                          ),
+          body: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.network(
+                                      'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Refresh',
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) =>
+                                            MyBasketItemPage()));
+                                  },
+                                  color: Colors.white,
+                                ),
+                              )
+                            ]
                         )
-                      ]
-                  )
-              ),
-              Center(
-                  child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: IconButton(
-                            icon: Image.network('https://cdn3.iconfinder.com/data/icons/summer-189/64/sun_bright_sunlight-512.png'),
-                            iconSize: 70.0,
-                            tooltip: 'Weather Forecast',
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => WeatherPage()));
-                            },
-                            color: Colors.white,
+                    ),
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.network(
+                                      'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Refresh',
+                                  onPressed: () => null,
+                                  color: Colors.white,
+                                ),
+                              )
+                            ]
+                        )
+                    ),
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.network(
+                                      'https://cdn3.iconfinder.com/data/icons/summer-189/64/sun_bright_sunlight-512.png'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Weather Forecast',
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) => WeatherPage()));
+                                  },
+                                  color: Colors.white,
 
-                          ),
+                                ),
+                              )
+                            ]
                         )
-                      ]
-                  )
-              ),
-            ],
-          ),
-        drawer: Drawer(
-          // Add a ListView to the drawer. This ensures the user can scroll
-          // through the options in the drawer if there isn't enough vertical
-          // space to fit everything.
-          child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                child: Text('Menu'),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
+                    ),
+                  ],
                 ),
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.history),
-                title: Text('History'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.delete_outline),
-                title: Text('Washing basket'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.schedule),
-                title: Text('Schedule cover'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.wb_sunny),
-                title: Text('Weather'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.message),
-                title: Text('Contact us'),
-                onTap: () {
-                  // Update the state of the app
-                  // ...
-                  // Then close the drawer
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+                Center(
+                    child:
+                    Text(GetRecomendaition(), style: TextStyle(fontSize: 25))
+                )
+              ]
           ),
-        ),
+          drawer: Drawer(
+            // Add a ListView to the drawer. This ensures the user can scroll
+            // through the options in the drawer if there isn't enough vertical
+            // space to fit everything.
+            child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  child: Text('Menu'),
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.history),
+                  title: Text('History'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.delete_outline),
+                  title: Text('Washing basket'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.schedule),
+                  title: Text('Schedule cover'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.wb_sunny),
+                  title: Text('Weather'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.message),
+                  title: Text('Contact us'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
 
-
-
-        floatingActionButton: LiteRollingSwitch(
-          // tooltip: 'Cover the laundry',
-          value: false,
-          textOn: "Covered",
-          textOff: "Uncovered",
-          textSize: 14.0,
-          colorOn: Colors.lightGreen,
-          colorOff: Colors.redAccent,
-          iconOn: Icons.power_settings_new,
-          iconOff: Icons.power_settings_new,
-          onChanged: (bool position) =>  SetCover(position),
-        ),
-        // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
-      ),
+          floatingActionButton: LiteRollingSwitch(
+            // tooltip: 'Cover the laundry',
+            value: false,
+            textOn: "Covered",
+            textOff: "Uncovered",
+            textSize: 14.0,
+            colorOn: Colors.lightGreen,
+            colorOff: Colors.redAccent,
+            iconOn: Icons.power_settings_new,
+            iconOff: Icons.power_settings_new,
+            onChanged: (bool position) => SetCover(position),
+          ),
+          // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
+        )
     );
   }
+
+  loadWeather() async {
+    setState(() {
+      isLoading = true;
+    });
+    final lat = 32.794044;
+    final lon = 34.989571;
+    final weatherResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
+            .toString()}&lon=${lon.toString()}');
+    final forecastResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
+            .toString()}&lon=${lon.toString()}');
+
+//    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
+
+    if (weatherResponse.statusCode == 200 &&
+        forecastResponse.statusCode == 200) {
+      return setState(() {
+        var json = jsonDecode(weatherResponse.body);
+        weatherList = new WeatherDescriptionList.fromJson(json);
+        isLoading = false;
+      });
+    }
+
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  String GetRecomendaition() {
+    var clear = 0;
+    var cloud = 0;
+
+    for (var i = 0; i < 10; i++) {
+      if (weatherList.list[i] == "Rain")
+        return "not a good time to hang laundry";
+      if (weatherList.list[i] == "Cloud")
+        cloud++;
+      if (weatherList.list[i] == "Clear")
+        clear++;
+    }
+    if (clear == 0)
+      return "it is the ideal time to hang laundry";
+    if (clear >= 8)
+      return "it is a good time to hang laundry";
+    if (clear >= 6)
+      return "it is ok time to hang laundry";
+
+    return "it is not rainy but not good time to hang laundry";
+  }
 }
+
 
 void SetCover(bool position){
   final databaseReference = FirebaseDatabase.instance.reference();
@@ -345,6 +421,8 @@ class _WeatherPage extends State<WeatherPage> {
     final forecastResponse = await http.get(
         'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
             .toString()}&lon=${lon.toString()}');
+
+//    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
