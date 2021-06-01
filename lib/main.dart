@@ -30,11 +30,11 @@ class MyApp extends StatelessWidget {
     };
 
     return new MaterialApp(
-      title: 'Laundry Rack App',
+      title: 'Smart Line',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Laundry Rack Home Page'),
+      home: new MyHomePage(title: 'Smart Line Home Page'),
       routes: routes,
     );
   }
@@ -65,16 +65,19 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final databaseReference = FirebaseDatabase.instance.reference();
     //add objects to database
+    /*
     databaseReference.child("Cover").set({
       'Status': 'closed'
     });
+
+     */
     return MaterialApp(
-        title: 'Laundry Rack App',
+        title: 'Smart Line',
         theme: ThemeData(
           primarySwatch: Colors.teal,
         ),
         home: Scaffold(
-          backgroundColor: Colors.tealAccent,
+          backgroundColor: Colors.white,
           appBar: AppBar(
             title: Text('            Smart Line'),
             actions: [
