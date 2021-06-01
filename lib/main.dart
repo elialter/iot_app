@@ -140,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
                                   icon: Image.network(
-                                      'https://cdn3.iconfinder.com/data/icons/summer-189/64/sun_bright_sunlight-512.png'),
+                                      'https://images-na.ssl-images-amazon.com/images/I/61ql%2BQimu-L.png'),
                                   iconSize: 70.0,
                                   tooltip: 'Weather Forecast',
                                   onPressed: () {
