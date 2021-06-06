@@ -8,6 +8,7 @@ class WeatherDescriptionList {
   factory WeatherDescriptionList.fromJson(Map<String, dynamic> json) {
     List clist = new List();
 
+
     for (dynamic e in json['list']) {
       String w = e['weather'][0]['main'];
       clist.add(w);

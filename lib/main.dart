@@ -54,12 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
 //  class MyApp extends StatelessWidget {
   @override
   bool isLoading = false;
-  WeatherDescriptionList weatherList;
+
 
   void initState() {
     super.initState();
     loadWeather();
   }
+
+  WeatherDescriptionList weatherList;
 
   @override
   Widget build(BuildContext context) {
@@ -263,11 +265,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final lat = 32.794044;
     final lon = 34.989571;
     final weatherResponse = await http.get(
-        'api.openweathermap.org/data/2.5/weather?q=London&appid=3b223fbe211147629d3f1c189bb6ca6f');
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571');
     final forecastResponse = await http.get(
-        'api.openweathermap.org/data/2.5/weather?q=London&appid=3b223fbe211147629d3f1c189bb6ca6f');
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571');
 
-//    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
@@ -288,7 +289,12 @@ class _MyHomePageState extends State<MyHomePage> {
     var clear = 0;
     var cloud = 0;
 
+//    while(weatherList == null)
+
     for (var i = 0; i < 10; i++) {
+      if (weatherList == null){
+        return "";
+      }
       if (weatherList.list[i] == "Rain")
         return "Not a good time to hang laundry";
       if (weatherList.list[i] == "Cloud")
@@ -296,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (weatherList.list[i] == "Clear")
         clear++;
     }
-    if (clear == 0)
+    if (clear == 10)
       return "Ideal time to hang laundry";
     if (clear >= 8)
       return "Good time to hang laundry";
@@ -543,23 +549,23 @@ class CoordinateTable{
   var coordinatesMap = new Map();
 
   void initTable(){
-  coordinatesMap['haifa'] = 'lat=32.794044&lon=34.989571';
-  coordinatesMap['tel aviv'] = 'lat=32.083333&lon=34.7999968';
-  coordinatesMap['jerusalem'] = 'lat=31.76904&lon=35.21633';
-  coordinatesMap['ariel'] = 'lat=32.1065&lon=35.18449';
-  coordinatesMap['netanya'] = 'lat=32.33291&lon=34.85992';
-  coordinatesMap['eilat'] = 'lat=29.55805&lon=34.94821';
-  coordinatesMap['beersheba'] = 'lat=31.2589&lon=34.7978';
-  coordinatesMap['nazareth'] = 'lat=32.7021&lon=35.2978';
-  coordinatesMap['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
-  coordinatesMap['ashqelon'] = 'lat=31.6658&lon=34.5664';
-  coordinatesMap['nahariyya'] = 'lat=33.0036&lon=35.0925';
-  coordinatesMap['raananna'] = 'lat=32.1833&lon=34.8667';
-  coordinatesMap['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
-  coordinatesMap['qatsrin'] = 'lat=32.9925&lon=35.6906';
-  coordinatesMap['efrat'] = 'lat=31.653589&lon=35.149934';
+    coordinatesMap['haifa'] = 'lat=32.794044&lon=34.989571';
+    coordinatesMap['tel aviv'] = 'lat=32.083333&lon=34.7999968';
+    coordinatesMap['jerusalem'] = 'lat=31.76904&lon=35.21633';
+    coordinatesMap['ariel'] = 'lat=32.1065&lon=35.18449';
+    coordinatesMap['netanya'] = 'lat=32.33291&lon=34.85992';
+    coordinatesMap['eilat'] = 'lat=29.55805&lon=34.94821';
+    coordinatesMap['beersheba'] = 'lat=31.2589&lon=34.7978';
+    coordinatesMap['nazareth'] = 'lat=32.7021&lon=35.2978';
+    coordinatesMap['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
+    coordinatesMap['ashqelon'] = 'lat=31.6658&lon=34.5664';
+    coordinatesMap['nahariyya'] = 'lat=33.0036&lon=35.0925';
+    coordinatesMap['raananna'] = 'lat=32.1833&lon=34.8667';
+    coordinatesMap['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
+    coordinatesMap['qatsrin'] = 'lat=32.9925&lon=35.6906';
+    coordinatesMap['efrat'] = 'lat=31.653589&lon=35.149934';
   }
-
+}
 
 
 
