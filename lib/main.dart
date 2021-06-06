@@ -30,11 +30,11 @@ class MyApp extends StatelessWidget {
     };
 
     return new MaterialApp(
-      title: 'Laundry Rack App',
+      title: 'Smart Line',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Laundry Rack Home Page'),
+      home: new MyHomePage(title: 'Smart Line Home Page'),
       routes: routes,
     );
   }
@@ -65,11 +65,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final databaseReference = FirebaseDatabase.instance.reference();
     //add objects to database
+    /*
     databaseReference.child("Cover").set({
       'Status': 'closed'
     });
+
+     */
     return MaterialApp(
-        title: 'Laundry Rack App',
+        title: 'Smart Line',
         theme: ThemeData(
           primarySwatch: Colors.teal,
         ),
@@ -287,20 +290,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
     for (var i = 0; i < 10; i++) {
       if (weatherList.list[i] == "Rain")
-        return "not a good time to hang laundry";
+        return "Not a good time to hang laundry";
       if (weatherList.list[i] == "Cloud")
         cloud++;
       if (weatherList.list[i] == "Clear")
         clear++;
     }
     if (clear == 0)
-      return "it is the ideal time to hang laundry";
+      return "Ideal time to hang laundry";
     if (clear >= 8)
-      return "it is a good time to hang laundry";
+      return "Good time to hang laundry";
     if (clear >= 6)
-      return "it is ok time to hang laundry";
+      return "Ok time to hang laundry";
 
-    return "it is not rainy but not good time to hang laundry";
+    return "Not rainy, but not a good time to hang laundry";
   }
 }
 
@@ -308,15 +311,22 @@ class _MyHomePageState extends State<MyHomePage> {
 void SetCover(bool position){
   final databaseReference = FirebaseDatabase.instance.reference();
   if(position) {
-    databaseReference.child('Cover').set({
+    databaseReference.child('Cover').update({
       'Status': 'Yes'
     });
   }
   else{
-    databaseReference.child('Cover').set({
+    databaseReference.child('Cover').update({
       'Status': 'No'
     });
   }
+  databaseReference.once().then((DataSnapshot snapshot) {
+    String CoverStatus = snapshot.value['Cover']['Status'];
+    databaseReference.child('test').update({
+      'status': CoverStatus
+    });
+  });
+
 }
 
 class WeatherPage extends StatefulWidget {
