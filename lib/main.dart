@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 
+import 'package:flutter_app2/lib/Settings.dart';
 import 'package:flutter_app2/lib/Weather.dart';
 import 'package:flutter_app2/lib/WeatherItem.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
@@ -17,14 +18,15 @@ import 'package:flutter_app2/models/ForecastData.dart';
 import 'package:flutter_app2/models/WeatherDescriptionList.dart';
 
 
-
 void main() => runApp(new MyApp());
 
+Settings settings = new Settings.Defualt();
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var routes = <String, WidgetBuilder>{
+      MyHomePage.routeName: (BuildContext context) => new MyHomePage(title: "Smart Line Home Page"),
       MyItemsPage.routeName: (BuildContext context) => new MyItemsPage(title: "MyItemsPage"),
       WeatherPage.routeName: (BuildContext context) => new WeatherPage(title: "WeatherPage"),
     };
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Smart Line Home Page'),
+      home: new MySettings(),
       routes: routes,
     );
   }
@@ -45,6 +47,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
+  static const String routeName = "/MyHomePage ";
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -54,7 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
 //  class MyApp extends StatelessWidget {
   @override
   bool isLoading = false;
-
+  CoordinateTable coordinateTable = new CoordinateTable.initTable();
+  String city = settings.GetLocation();
 
   void initState() {
     super.initState();
@@ -206,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: Text('Washing basket'),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => WeatherPage()));
+                        builder: (context) => MyBasketItemPage()));
                   },
                 ),
                 ListTile(
@@ -262,13 +266,18 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       isLoading = true;
     });
-    final lat = 32.794044;
-    final lon = 34.989571;
-    final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571');
-    final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571');
 
+    String newlatlon;
+    newlatlon = coordinateTable.coordinatesMap[city];
+
+//    final lat = 32.794044;
+//    final lon = 34.989571;
+    final weatherResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+    final forecastResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+
+    //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
@@ -357,6 +366,8 @@ class _WeatherPage extends State<WeatherPage> {
   bool isLoading = false;
   WeatherData weatherData;//=WeatherData();
   ForecastData forecastData;//=ForecastData();
+  CoordinateTable coordinateTable = new CoordinateTable.initTable();
+  String city = settings.GetLocation();
 
   @override
   void initState()  {
@@ -423,16 +434,17 @@ class _WeatherPage extends State<WeatherPage> {
     setState(() {
       isLoading = true;
     });
-    final lat = 32.794044;
-    final lon =  34.989571;
-    final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
-            .toString()}&lon=${lon.toString()}');
-    final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
-            .toString()}&lon=${lon.toString()}');
+    String newlatlon;
+    newlatlon = coordinateTable.coordinatesMap[city];
 
-//    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
+//    final lat = 32.794044;
+//    final lon = 34.989571;
+    final weatherResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+    final forecastResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+
+    //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
@@ -546,29 +558,239 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
 }
 
 class CoordinateTable{
-  var coordinatesMap = new Map();
+  Map coordinatesMap;
 
-  void initTable(){
-    coordinatesMap['haifa'] = 'lat=32.794044&lon=34.989571';
-    coordinatesMap['tel aviv'] = 'lat=32.083333&lon=34.7999968';
-    coordinatesMap['jerusalem'] = 'lat=31.76904&lon=35.21633';
-    coordinatesMap['ariel'] = 'lat=32.1065&lon=35.18449';
-    coordinatesMap['netanya'] = 'lat=32.33291&lon=34.85992';
-    coordinatesMap['eilat'] = 'lat=29.55805&lon=34.94821';
-    coordinatesMap['beersheba'] = 'lat=31.2589&lon=34.7978';
-    coordinatesMap['nazareth'] = 'lat=32.7021&lon=35.2978';
-    coordinatesMap['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
-    coordinatesMap['ashqelon'] = 'lat=31.6658&lon=34.5664';
-    coordinatesMap['nahariyya'] = 'lat=33.0036&lon=35.0925';
-    coordinatesMap['raananna'] = 'lat=32.1833&lon=34.8667';
-    coordinatesMap['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
-    coordinatesMap['qatsrin'] = 'lat=32.9925&lon=35.6906';
-    coordinatesMap['efrat'] = 'lat=31.653589&lon=35.149934';
+  CoordinateTable({this.coordinatesMap});
+
+   factory CoordinateTable.initTable(){
+    Map map  = new Map();
+    map['haifa'] = 'lat=32.794044&lon=34.989571';
+    map['tel aviv'] = 'lat=32.083333&lon=34.7999968';
+    map['jerusalem'] = 'lat=31.76904&lon=35.21633';
+    map['ariel'] = 'lat=32.1065&lon=35.18449';
+    map['netanya'] = 'lat=32.33291&lon=34.85992';
+    map['eilat'] = 'lat=29.55805&lon=34.94821';
+    map['beersheba'] = 'lat=31.2589&lon=34.7978';
+    map['nazareth'] = 'lat=32.7021&lon=35.2978';
+    map['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
+    map['ashqelon'] = 'lat=31.6658&lon=34.5664';
+    map['nahariyya'] = 'lat=33.0036&lon=35.0925';
+    map['herzelia'] = 'lat=32.184448&lon=34.870766';
+    map['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
+    map['qatsrin'] = 'lat=32.9925&lon=35.6906';
+    map['efrat'] = 'lat=31.653589&lon=35.149934';
+
+    return CoordinateTable(
+        coordinatesMap: map,
+    );
   }
 }
 
+class MySettings extends StatefulWidget {
+  @override
+  _MySettingsState createState() => _MySettingsState();
+}
 
+class _MySettingsState extends State<MySettings> {
+  String _chosenCity;
+  String _chosenPolicy;
+  String _chosenGoodDay;
+  String _chosenBasketallert;
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Settings"),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 60.0),
+              child: Center(
+                child: Container(
+                    width: 200,
+                    height: 150,
+                    /*decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(50.0)),*/
+                    child: Image.asset('asset/images/flutter-logo.png')),
+              ),
+            ),
+            Padding(
+              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: DropdownButton<String>(
+                focusColor:Colors.white,
+                value: _chosenBasketallert,
+                //elevation: 5,
+                style: TextStyle(color: Colors.white),
+                iconEnabledColor:Colors.black,
+                items: <String>[
+                  'Yes, when its almost full',
+                  'Yes, when its totaly full',
+                  'No',
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value,style:TextStyle(color:Colors.black),),
+                  );
+                }).toList(),
+                hint:Text(
+                  "to notify you on the basket status",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500),
+                ),
+                onChanged: (String value) {
+                  setState(() {
+                    _chosenBasketallert = value;
+                    settings.SetBasketCapacityAllert(_chosenBasketallert);
+                  });
+                },
+              ),
+            ),
+            Padding(
+              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: DropdownButton<String>(
+                focusColor:Colors.white,
+                value: _chosenGoodDay,
+                //elevation: 5,
+                style: TextStyle(color: Colors.white),
+                iconEnabledColor:Colors.black,
+                items: <String>[
+                  'Yes',
+                  'No',
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value,style:TextStyle(color:Colors.black),),
+                  );
+                }).toList(),
+                hint:Text(
+                  "to notify you if in a good day?",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500),
+                ),
+                onChanged: (String value) {
+                  setState(() {
+                    _chosenGoodDay = value;
+                    settings.SetGoodDayAllert(_chosenPolicy);
+                  });
+                },
+              ),
+            ),
+            Padding(
+              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: DropdownButton<String>(
+                focusColor:Colors.white,
+                value: _chosenPolicy,
+                //elevation: 5,
+                style: TextStyle(color: Colors.white),
+                iconEnabledColor:Colors.black,
+                items: <String>[
+                  'Yes',
+                  'No',
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value,style:TextStyle(color:Colors.black),),
+                  );
+                }).toList(),
+                hint:Text(
+                  "to ask you before covering the line?",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500),
+                ),
+                onChanged: (String value) {
+                  setState(() {
+                    _chosenPolicy = value;
+                    settings.SetCoverPolicy(_chosenPolicy);
+                  });
+                },
+              ),
+            ),
+            Padding(
+              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: DropdownButton<String>(
+                focusColor:Colors.white,
+                value: _chosenCity,
+                //elevation: 5,
+                style: TextStyle(color: Colors.white),
+                iconEnabledColor:Colors.black,
+                items: <String>[
+                  'haifa',
+                  'tel aviv',
+                  'jerusalem',
+                  'ariel',
+                  'netanya',
+                  'eilat',
+                  'beersheba',
+                  'nazareth',
+                  'rishon leẔiyyon',
+                  'ashqelon',
+                  'nahariyya',
+                  'herzelia',
+                  'qiryat shemona',
+                  'qatsrin',
+                  'efrat',
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value,style:TextStyle(color:Colors.black),),
+                  );
+                }).toList(),
+                hint:Text(
+                  "Please choose your smart line location",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500),
+                ),
+                onChanged: (String value) {
+                  setState(() {
+                    _chosenCity = value;
+                    settings.SetLocation(_chosenCity);
+                  });
+                },
+              ),
+            ),
+            Container(
+              height: 50,
+              width: 250,
+              decoration: BoxDecoration(
+                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+              child: FlatButton(
+                onPressed: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => MyHomePage()));
+                },
+                child: Text(
+                  'Set Settings',
+                  style: TextStyle(color: Colors.white, fontSize: 22),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 130,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 
