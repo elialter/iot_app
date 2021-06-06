@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
           primarySwatch: Colors.teal,
         ),
         home: Scaffold(
-          backgroundColor: Colors.tealAccent,
+          backgroundColor: Colors.white,
           appBar: AppBar(
             title: Text('            Smart Line'),
             actions: [
@@ -200,10 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.delete_outline),
                   title: Text('Washing basket'),
                   onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => WeatherPage()));
                   },
                 ),
                 ListTile(
@@ -220,10 +218,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.wb_sunny),
                   title: Text('Weather'),
                   onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => WeatherPage()));
                   },
                 ),
                 ListTile(
@@ -264,11 +260,9 @@ class _MyHomePageState extends State<MyHomePage> {
     final lat = 32.794044;
     final lon = 34.989571;
     final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
-            .toString()}&lon=${lon.toString()}');
+        'api.openweathermap.org/data/2.5/weather?q=London&appid=3b223fbe211147629d3f1c189bb6ca6f');
     final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=${lat
-            .toString()}&lon=${lon.toString()}');
+        'api.openweathermap.org/data/2.5/weather?q=London&appid=3b223fbe211147629d3f1c189bb6ca6f');
 
 //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
@@ -534,6 +528,27 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
 
   }
 }
+
+class CoordinateTable{
+  var coordinatesMap = new Map();
+
+  void initTable(){
+  coordinatesMap['haifa'] = 'lat=32.794044&lon=34.989571';
+  coordinatesMap['tel aviv'] = 'lat=32.083333&lon=34.7999968';
+  coordinatesMap['jerusalem'] = 'lat=31.76904&lon=35.21633';
+  coordinatesMap['ariel'] = 'lat=32.1065&lon=35.18449';
+  coordinatesMap['netanya'] = 'lat=32.33291&lon=34.85992';
+  coordinatesMap['eilat'] = 'lat=29.55805&lon=34.94821';
+  coordinatesMap['beersheba'] = 'lat=31.2589&lon=34.7978';
+  coordinatesMap['nazareth'] = 'lat=32.7021&lon=35.2978';
+  coordinatesMap['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
+  coordinatesMap['ashqelon'] = 'lat=31.6658&lon=34.5664';
+  coordinatesMap['nahariyya'] = 'lat=33.0036&lon=35.0925';
+  coordinatesMap['raananna'] = 'lat=32.1833&lon=34.8667';
+  coordinatesMap['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
+  coordinatesMap['qatsrin'] = 'lat=32.9925&lon=35.6906';
+  coordinatesMap['efrat'] = 'lat=31.653589&lon=35.149934';
+  }
 
 
 
