@@ -1,9 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
-//import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import 'dart:convert';
@@ -17,8 +18,18 @@ import 'package:flutter_app2/models/WeatherData.dart';
 import 'package:flutter_app2/models/ForecastData.dart';
 import 'package:flutter_app2/models/WeatherDescriptionList.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() => runApp(new MyApp());
+
+Future<void> _messageHandler(RemoteMessage message) async {
+  print('background message ${message.notification?.body}');
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(new MyApp());
+}
 
 Settings settings = new Settings.Defualt();
 
@@ -61,7 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String city = settings.GetLocation();
 
   void initState() {
-    super.initState();
+    updateToken();
+    messageHandler(context);
     loadWeather();
   }
 
@@ -69,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Firebase.initializeApp();
     final databaseReference = FirebaseDatabase.instance.reference();
     //add objects to database
     /*
@@ -108,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                  icon: Image.network(
-                                      'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
+                                  icon: Image.asset('Assets/basket.png'), // Image.network(
+                                        //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
                                   iconSize: 70.0,
                                   tooltip: 'Refresh',
                                   onPressed: () {
@@ -130,8 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                  icon: Image.network(
-                                      'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
+                                  icon: Image.asset('Assets/line.PNG'),    //Image.network(
+                                  //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
                                   iconSize: 70.0,
                                   tooltip: 'Refresh',
                                   onPressed: () => null,
@@ -373,6 +386,14 @@ class _WeatherPage extends State<WeatherPage> {
   void initState()  {
     super.initState();
     loadWeather();
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      print("message recieved");
+      print(event.notification?.body);
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print('Message clicked!');
+    });
   }
 
   @override
@@ -455,6 +476,8 @@ class _WeatherPage extends State<WeatherPage> {
         isLoading = false;
       });
     }
+
+
 
 
 
@@ -792,6 +815,45 @@ class _MySettingsState extends State<MySettings> {
   }
 }
 
+void updateToken() async{
+  FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  String fcmToken = await _fcm.getToken();
+  log(fcmToken);
+  final databaseReference = FirebaseDatabase.instance.reference();
+  if(fcmToken !=null){
+    databaseReference.child('Tokens').update({
+      'token': fcmToken
+    });
+  }
+}
 
-
+void messageHandler(BuildContext context) {
+  FirebaseMessaging.onBackgroundMessage(_messageHandler);
+  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    print("message recieved");
+    print(event.notification?.body);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Notification"),
+            content: Text(event.notification?.body),
+            actions: [
+              TextButton(
+                child: Text("Ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  });
+  FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    print('Message clicked!');
+  });
+  //var messaging = FirebaseMessaging.instance;
+  //messaging.subscribeToTopic("messaging");
+  //messaging.unsubscribeFromTopic("messaging");
+}
 
