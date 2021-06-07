@@ -21,9 +21,7 @@ import 'package:flutter_app2/models/WeatherDescriptionList.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 
-Future<void> _messageHandler(RemoteMessage message) async {
-  print('background message ${message.notification?.body}');
-}
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +40,12 @@ class MyApp extends StatelessWidget {
       WeatherPage.routeName: (BuildContext context) => new WeatherPage(title: "WeatherPage"),
     };
 
+    messageHandler(context);
+
     return new MaterialApp(
       title: 'Smart Line',
       theme: new ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
       ),
       home: new MySettings(),
       routes: routes,
@@ -348,13 +348,6 @@ void SetCover(bool position){
       'Status': 'No'
     });
   }
-  databaseReference.once().then((DataSnapshot snapshot) {
-    String CoverStatus = snapshot.value['Cover']['Status'];
-    databaseReference.child('test').update({
-      'status': CoverStatus
-    });
-  });
-
 }
 
 class WeatherPage extends StatefulWidget {
@@ -386,7 +379,9 @@ class _WeatherPage extends State<WeatherPage> {
   void initState()  {
     super.initState();
     loadWeather();
-    super.initState();
+    messageHandler(context);
+    //super.initState();
+    /*
     FirebaseMessaging.onMessage.listen((RemoteMessage event) {
       print("message recieved");
       print(event.notification?.body);
@@ -394,6 +389,8 @@ class _WeatherPage extends State<WeatherPage> {
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print('Message clicked!');
     });
+
+     */
   }
 
   @override
@@ -640,7 +637,7 @@ class _MySettingsState extends State<MySettings> {
                     /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('asset/images/flutter-logo.png')),
+                    child: Image.asset('Assets/line.PNG')),
               ),
             ),
             Padding(
@@ -774,12 +771,15 @@ class _MySettingsState extends State<MySettings> {
                     child: Text(value,style:TextStyle(color:Colors.black),),
                   );
                 }).toList(),
-                hint:Text(
-                  "Please choose your smart line location",
+                hint: FittedBox  (
+                  fit: BoxFit.fitWidth,
+                  child:Text(
+                  "Smart line location",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.w500),
+                  ),
                 ),
                 onChanged: (String value) {
                   setState(() {
@@ -793,7 +793,7 @@ class _MySettingsState extends State<MySettings> {
               height: 50,
               width: 250,
               decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+                  color: Colors.teal, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () {
                   Navigator.push(
@@ -830,13 +830,13 @@ void updateToken() async{
 void messageHandler(BuildContext context) {
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    print("message recieved");
+    handleMessage(event.data["body"]);
     print(event.notification?.body);
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Notification"),
+            title: Text(event.notification?.title),
             content: Text(event.notification?.body),
             actions: [
               TextButton(
@@ -850,10 +850,24 @@ void messageHandler(BuildContext context) {
         });
   });
   FirebaseMessaging.onMessageOpenedApp.listen((message) {
-    print('Message clicked!');
+    handleMessage(message.data["body"]); //need?
   });
   //var messaging = FirebaseMessaging.instance;
   //messaging.subscribeToTopic("messaging");
   //messaging.unsubscribeFromTopic("messaging");
 }
+
+Future<void> _messageHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  //handleMessage(message.notification?.title); //need?
+}
+
+void handleMessage(String field) { //For Eli
+  final databaseReference = FirebaseDatabase.instance.reference();
+  databaseReference.once().then((DataSnapshot snapshot) {
+    String Status = snapshot.value[field]['Status'];
+    //Do something with updated status
+  });
+}
+
 
