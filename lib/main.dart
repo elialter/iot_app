@@ -108,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //child: Icon(Icons.search),
               ),
               Icon(Icons.more_vert),
-            ],c
+            ],
           ),
           body: Column(
               children: [

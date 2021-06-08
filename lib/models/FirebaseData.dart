@@ -2,7 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
 
 class FirebaseData {
-  var Map dataMap;
+  Map dataMap;
 
   FirebaseData({this.dataMap});
 
