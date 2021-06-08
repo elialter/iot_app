@@ -17,6 +17,7 @@ import 'package:flutter_app2/lib/WeatherItem.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
 import 'package:flutter_app2/models/ForecastData.dart';
 import 'package:flutter_app2/models/WeatherDescriptionList.dart';
+import 'package:flutter_app2/models/FirebaseData.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -30,6 +31,7 @@ void main() async {
 }
 
 Settings settings = new Settings.Defualt();
+FirebaseData firebaseData = new FirebaseData.Init();
 
 class MyApp extends StatelessWidget {
   @override
@@ -106,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //child: Icon(Icons.search),
               ),
               Icon(Icons.more_vert),
-            ],
+            ],c
           ),
           body: Column(
               children: [
@@ -561,6 +563,8 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
     );
   }
   String ShowBasketStatus(){
+    basketStatus = firebaseData.GetData("Laundry basket");
+    
     if (basketStatus == 0){
       return "images/emptyBasket.png";
     }
@@ -866,6 +870,8 @@ void handleMessage(String field) { //For Eli
   final databaseReference = FirebaseDatabase.instance.reference();
   databaseReference.once().then((DataSnapshot snapshot) {
     String Status = snapshot.value[field]['Status'];
+    int value = int.parse(snapshot.value[field]['Status']);
+    firebaseData.SetData(field, value);
     //Do something with updated status
   });
 }
