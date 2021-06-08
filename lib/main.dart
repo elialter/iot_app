@@ -123,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                  icon: Image.asset('Assets/basket.png'), // Image.network(
+                                  icon: Image.asset('Assets/basket3.png'), // Image.network(
                                         //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
                                   iconSize: 70.0,
                                   tooltip: 'Refresh',
@@ -342,12 +342,12 @@ void SetCover(bool position){
   final databaseReference = FirebaseDatabase.instance.reference();
   if(position) {
     databaseReference.child('Cover').update({
-      'Status': 'Yes'
+      'Status': 1
     });
   }
   else{
     databaseReference.child('Cover').update({
-      'Status': 'No'
+      'Status': 0
     });
   }
 }
@@ -564,20 +564,21 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
   }
   String ShowBasketStatus(){
     basketStatus = firebaseData.GetData("Laundry basket");
-    
+    print("basketStatus");
+    print(basketStatus);
     if (basketStatus == 0){
-      return "images/emptyBasket.png";
+      return "images/basket0.png";
     }
     if (basketStatus == 1){
-      return "images/yellowBasket.png";
+      return "images/basket1.png";
     }
     if (basketStatus == 2){
-      return "images/orangeBasket.png";
+      return "images/basket2.png";
     }
     if (basketStatus == 3){
-      return "images/redBasket.png";
+      return "images/basket3.png";
     }
-
+    return "images/basket0.png";
   }
 }
 
@@ -654,8 +655,8 @@ class _MySettingsState extends State<MySettings> {
                 style: TextStyle(color: Colors.white),
                 iconEnabledColor:Colors.black,
                 items: <String>[
-                  'Yes, when its almost full',
-                  'Yes, when its totaly full',
+                  'Yes, when it\'s almost full',
+                  'Yes, when it\'s totaly full',
                   'No',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -664,7 +665,7 @@ class _MySettingsState extends State<MySettings> {
                   );
                 }).toList(),
                 hint:Text(
-                  "to notify you on the basket status",
+                  "Get notification for the basket status",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
@@ -697,7 +698,7 @@ class _MySettingsState extends State<MySettings> {
                   );
                 }).toList(),
                 hint:Text(
-                  "to notify you if in a good day?",
+                  "Get notification in case of a good day?",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
@@ -721,8 +722,8 @@ class _MySettingsState extends State<MySettings> {
                 style: TextStyle(color: Colors.white),
                 iconEnabledColor:Colors.black,
                 items: <String>[
-                  'Yes',
-                  'No',
+                  'Cover Automatically',
+                  'Ask me before covering',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -730,7 +731,7 @@ class _MySettingsState extends State<MySettings> {
                   );
                 }).toList(),
                 hint:Text(
-                  "to ask you before covering the line?",
+                  "Default behaviour in case of rain",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
@@ -754,21 +755,21 @@ class _MySettingsState extends State<MySettings> {
                 style: TextStyle(color: Colors.white),
                 iconEnabledColor:Colors.black,
                 items: <String>[
-                  'haifa',
-                  'tel aviv',
-                  'jerusalem',
-                  'ariel',
-                  'netanya',
-                  'eilat',
-                  'beersheba',
-                  'nazareth',
-                  'rishon leẔiyyon',
-                  'ashqelon',
-                  'nahariyya',
-                  'herzelia',
-                  'qiryat shemona',
-                  'qatsrin',
-                  'efrat',
+                  'Haifa',
+                  'Tel Aviv',
+                  'Jerusalem',
+                  'Ariel',
+                  'Netanya',
+                  'Eilat',
+                  'Beersheba',
+                  'Nazareth',
+                  'Rishon LeẔiyyon',
+                  'Ashqelon',
+                  'Nahariyya',
+                  'Herzelia',
+                  'Qiryat Shemona',
+                  'Qatsrin',
+                  'Efrat',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
