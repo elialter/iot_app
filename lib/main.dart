@@ -31,7 +31,7 @@ void main() async {
 }
 
 Settings settings = new Settings.Defualt();
-FirebaseData firebaseData = new FirebaseData.Init();
+FirebaseData firebaseData;
 
 class MyApp extends StatelessWidget {
   @override
@@ -43,6 +43,7 @@ class MyApp extends StatelessWidget {
     };
 
     messageHandler(context);
+    firebaseData = new FirebaseData.Init();
 
     return new MaterialApp(
       title: 'Smart Line',
@@ -80,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   WeatherDescriptionList weatherList;
+  WeatherData weatherData;//=WeatherData();
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           body: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -123,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: IconButton(
-                                  icon: Image.asset('Assets/basket3.png'), // Image.network(
+                                  icon: Image.asset(ShowBasketStatus()), // Image.network(
                                         //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
                                   iconSize: 70.0,
                                   tooltip: 'Refresh',
@@ -180,10 +183,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: weatherData != null ? Weather(weather: weatherData) : Container(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: isLoading ? CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        valueColor: new AlwaysStoppedAnimation(Colors.purple),
+                      ) : IconButton(
+                        icon: new Icon(Icons.refresh),
+                        tooltip: 'Refresh',
+                        onPressed: loadWeather,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
                 Center(
                     child:
                     Text(GetRecomendaition(), style: TextStyle(fontSize: 25))
-                )
+                ),
               ]
           ),
           drawer: Drawer(
@@ -299,6 +323,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return setState(() {
         var json = jsonDecode(weatherResponse.body);
         weatherList = new WeatherDescriptionList.fromJson(json);
+        weatherData = new WeatherData.fromJson(json['list'][0], json['city']['name']);
         isLoading = false;
       });
     }
@@ -475,7 +500,7 @@ class _WeatherPage extends State<WeatherPage> {
         isLoading = false;
       });
     }
-
+    return "images/emptyBasket.png";
 
 
 
@@ -556,30 +581,52 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
       body: new Container(
         child: new Column(
             children: <Widget>[
-              Image.asset(ShowBasketStatus())
+              Column(
+                children: [
+                  Image.asset(ShowBasketStatus()),
+                  Text(GetBasketStatus(), style: TextStyle(fontSize: 25))
+                ],
+              )
             ]
         ),
       ),
     );
   }
-  String ShowBasketStatus(){
-    basketStatus = firebaseData.GetData("Laundry basket");
-    print("basketStatus");
-    print(basketStatus);
+  String GetBasketStatus(){
+    int basketStatus = firebaseData.GetData("Laundry basket");
+
     if (basketStatus == 0){
-      return "images/basket0.png";
+      return "your basket is empty";
     }
     if (basketStatus == 1){
-      return "images/basket1.png";
+      return "you have few laundry in your basket";
     }
     if (basketStatus == 2){
-      return "images/basket2.png";
+      return "you have a lot of laundry in your basket";
     }
     if (basketStatus == 3){
-      return "images/basket3.png";
+      return "your basket is full";
     }
+    return "";
+  }
+}
+
+String ShowBasketStatus(){
+  int basketStatus = firebaseData.GetData("Laundry basket");
+
+  if (basketStatus == 0){
     return "images/basket0.png";
   }
+  if (basketStatus == 1){
+    return "images/basket1.png";
+  }
+  if (basketStatus == 2){
+    return "images/basket2.png";
+  }
+  if (basketStatus == 3){
+    return "images/basket3.png";
+  }
+  return "images/basket0.png";
 }
 
 class CoordinateTable{
@@ -869,12 +916,31 @@ Future<void> _messageHandler(RemoteMessage message) async {
 
 void handleMessage(String field) { //For Eli
   final databaseReference = FirebaseDatabase.instance.reference();
-  databaseReference.once().then((DataSnapshot snapshot) {
-    String Status = snapshot.value[field]['Status'];
-    int value = int.parse(snapshot.value[field]['Status']);
-    firebaseData.SetData(field, value);
-    //Do something with updated status
+  databaseReference.child("$field/Status").once().then((DataSnapshot data){
+    print("$field/Status");
+    print(data.value);
+    firebaseData.SetData(field, data.value);
   });
 }
 
-
+int MakeInt(String strnum){
+  if (strnum == '0'){
+    return 0;
+  }
+  if (strnum == '1'){
+    return 1;
+  }
+  if (strnum == '2'){
+    return 2;
+  }
+  if (strnum == '3'){
+    return 3;
+  }
+  if (strnum == '4'){
+    return 4;
+  }
+  if (strnum == '5'){
+    return 5;
+  }
+  return 0;
+}
