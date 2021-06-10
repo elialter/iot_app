@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
@@ -22,11 +23,12 @@ import 'package:flutter_app2/models/FirebaseData.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 
-
+const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  updateToken();
   runApp(new MyApp());
 }
 
@@ -75,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String city = settings.GetLocation();
 
   void initState() {
-    updateToken();
+    //updateToken();
     messageHandler(context);
     loadWeather();
   }
@@ -206,7 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 Center(
                     child:
-                    Text(GetRecomendaition(), style: TextStyle(fontSize: 25))
+                    Text(GetRecomendaition(), style: TextStyle(fontSize: 25), textAlign: TextAlign.center,),
+                  heightFactor: 5,
                 ),
               ]
           ),
@@ -288,8 +291,8 @@ class _MyHomePageState extends State<MyHomePage> {
             // tooltip: 'Cover the laundry',
             value: false,
             textOn: "Covered",
-            textOff: "Uncovered",
-            textSize: 14.0,
+            textOff: " Uncovered",
+            textSize: 13.0,
             colorOn: Colors.lightGreen,
             colorOff: Colors.redAccent,
             iconOn: Icons.power_settings_new,
@@ -422,11 +425,13 @@ class _WeatherPage extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+
     //loadWeather();
     sleep(Duration(seconds : 2));
     return Scaffold(
+      backgroundColor:Colors.yellow[40],
       appBar: AppBar(
-        title: Text('Weather Forecast'),
+        title: Text('      Weather Forecast'),
         backgroundColor: Colors.teal,
       ),
         body: Center(
@@ -575,7 +580,7 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: Text('Basket Status'),
+        title: Text('          Basket Status'),
         backgroundColor: Colors.teal,
       ),
       body: new Container(
@@ -584,7 +589,7 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
               Column(
                 children: [
                   Image.asset(ShowBasketStatus()),
-                  Text(GetBasketStatus(), style: TextStyle(fontSize: 25))
+                  Text(GetBasketStatus(), style: TextStyle(fontSize: 25), textAlign: TextAlign.center,)
                 ],
               )
             ]
@@ -596,16 +601,16 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
     int basketStatus = firebaseData.GetData("Laundry basket");
 
     if (basketStatus == 0){
-      return "your basket is empty";
+      return "Your basket is empty";
     }
     if (basketStatus == 1){
-      return "you have few laundry in your basket";
+      return "You don't have much laundry in your basket";
     }
     if (basketStatus == 2){
-      return "you have a lot of laundry in your basket";
+      return "You have a lot of laundry in your basket";
     }
     if (basketStatus == 3){
-      return "your basket is full";
+      return "Your basket is full";
     }
     return "";
   }
@@ -674,7 +679,7 @@ class _MySettingsState extends State<MySettings> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Settings"),
+        title: Text("                          Settings"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -874,7 +879,7 @@ void updateToken() async{
   final databaseReference = FirebaseDatabase.instance.reference();
   if(fcmToken !=null){
     databaseReference.child('Tokens').update({
-      'token': fcmToken
+      user: fcmToken
     });
   }
 }
@@ -884,12 +889,13 @@ void messageHandler(BuildContext context) {
   FirebaseMessaging.onMessage.listen((RemoteMessage event) {
     handleMessage(event.data["body"]);
     print(event.notification?.body);
+    var seperateCharIndex =event.notification?.body.indexOf(":");
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(event.notification?.title),
-            content: Text(event.notification?.body),
+            title: Text(event.notification?.title, textAlign: TextAlign.center,),
+            content: Text("${event.notification?.body}", textAlign: TextAlign.center), //.substring(0,seperateCharIndex)} and status is ${event.notification?.body.substring(seperateCharIndex)}"),
             actions: [
               TextButton(
                 child: Text("Ok"),
@@ -915,10 +921,12 @@ Future<void> _messageHandler(RemoteMessage message) async {
 }
 
 void handleMessage(String field) { //For Eli
+  print("handleMessage was called");
   final databaseReference = FirebaseDatabase.instance.reference();
   databaseReference.child("$field/Status").once().then((DataSnapshot data){
     print("$field/Status");
     print(data.value);
+    int value = int.parse(data.value);
     firebaseData.SetData(field, data.value);
   });
 }

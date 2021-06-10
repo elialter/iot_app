@@ -10,19 +10,19 @@ class FirebaseData {
     Map map = new Map();
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("Cover/Status").once().then((DataSnapshot data){
-      map['Cover'] = data.value;
+      map['Cover'] =data.value;
     });
     databaseReference.child("Clothes on line/Status").once().then((DataSnapshot data){
-      map['Clothes on line'] = data.value;
+      map['Clothes on line'] =data.value;
     });
-    databaseReference.child("Laundry basket/Status").once().then((DataSnapshot data){
-      map['Laundry basket'] = data.value;
+    databaseReference.child('Laundry basket/Status').once().then((DataSnapshot data){
+      map['Laundry basket'] =data.value;
     });
-    databaseReference.child("Rain/Status").once().then((DataSnapshot data){
-      map['Rain'] = data.value;
+    databaseReference.child('Rain/Status').once().then((DataSnapshot data){
+      map['Rain'] =data.value;
     });
-    databaseReference.child("Sun Light/Status").once().then((DataSnapshot data){
-      map['Sun Light'] =  data.value;
+    databaseReference.child('Sun Light/Status').once().then((DataSnapshot data){
+      map['Sun Light'] =data.value;
     });
 
     return FirebaseData(
