@@ -48,6 +48,7 @@ class MyApp extends StatelessWidget {
     firebaseData = new FirebaseData.Init();
 
     return new MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Smart Line',
       theme: new ThemeData(
         primarySwatch: Colors.teal,
@@ -97,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
      */
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Smart Line',
         theme: ThemeData(
           primarySwatch: Colors.teal,
