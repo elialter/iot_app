@@ -35,23 +35,30 @@ void main() async {
 Settings settings;
 FirebaseData firebaseData;
 
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var routes = <String, WidgetBuilder>{
-      MyHomePage.routeName: (BuildContext context) => new MyHomePage(title: "Smart Line Home Page"),
-      MyItemsPage.routeName: (BuildContext context) => new MyItemsPage(title: "MyItemsPage"),
-      WeatherPage.routeName: (BuildContext context) => new WeatherPage(title: "WeatherPage"),
+      MyHomePage.routeName: (BuildContext context) =>
+      new MyHomePage(title: "Smart Line Home Page"),
+      MyItemsPage.routeName: (BuildContext context) =>
+      new MyItemsPage(title: "MyItemsPage"),
+      WeatherPage.routeName: (BuildContext context) =>
+      new WeatherPage(title: "WeatherPage"),
+      MySettings.routeName: (BuildContext context) =>
+      new MySettings(title: "MySettings"),
     };
 
     messageHandler(context);
     firebaseData = new FirebaseData.Init();
     settings = new Settings.Defualt();
-    settings.SetAlreadySet(firebaseData.GetData("Laundry basket"));
 
-
+    GetSettingsStatus();
+//    settings.SetAlreadySet(firebaseData.GetData("Already set"));
     Widget currentHome;
-    if(settings.GetAlreadySet() == 0){
+    //print("---------------------------------------------------------:"+settingsStatus.first().toString());
+    if (firebaseData.GetSetStatus() == 0) {
       currentHome = new MySettings();
     }
     else {
@@ -69,6 +76,20 @@ class MyApp extends StatelessWidget {
     );
   }
 
+  void GetSettingsStatus() async {
+    final databaseReference = FirebaseDatabase.instance.reference();
+      databaseReference.child("Settings/Already set").once().then((DataSnapshot data) {
+        int fcmToken = data.value;
+        log("test: "+fcmToken.toString());
+        String newS = fcmToken.toString().substring(0,2);
+        firebaseData.SetData("Already set", newS);
+//        log("firebaseData: "+firebaseData.GetData("Already set").toString());
+
+      });
+
+
+    //print("basket: ${await firebaseData.GetData("Laundry basket")}");
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -677,6 +698,11 @@ class CoordinateTable{
 }
 
 class MySettings extends StatefulWidget {
+  MySettings({Key key, this.title}) : super(key: key);
+
+  final String title;
+  static const String routeName = "/MySettings ";
+
   @override
   _MySettingsState createState() => _MySettingsState();
 }

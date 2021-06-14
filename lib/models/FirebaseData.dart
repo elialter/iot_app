@@ -8,6 +8,12 @@ class FirebaseData {
 
   factory FirebaseData.Init() {
     Map map = new Map();
+    map['Cover'] = 0;
+    map['Clothes on line'] = 0;
+    map['Laundry basket'] = 0;
+    map['Rain'] = 0;
+    map['Sun Light'] = 0;
+    map['Already set'] = 0;
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("Cover/Status").once().then((DataSnapshot data){
       map['Cover'] =data.value;
@@ -39,21 +45,29 @@ class FirebaseData {
     if (field == "Settings/Already set"){
        newField = "Already set";
        databaseReference.child("Settings/Already set").once().then((DataSnapshot data) {
-         newData = data.value;
+         dataMap[newField] = data.value;
        });
     }
     else {
       newField = field;
       databaseReference.child("$field/Status").once().then((DataSnapshot data) {
-        newData = data.value;
+        dataMap[newField] = data.value;
       });
     }
-    dataMap[newField] = newData;
     return dataMap[newField];
   }
 
-  void SetData(String field, int data){
-    dataMap[field] = data;
+  int GetSetStatus(){
+    return dataMap["Already set"];
+  }
+
+  void SetData(String field, String data){
+    if (data == "0"){
+      dataMap[field] = 0;
+    }
+    else{
+      dataMap[field] = 1;
+    }
   }
   loadData(Map map) async {
     final databaseReference = FirebaseDatabase.instance.reference();
