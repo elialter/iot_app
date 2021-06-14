@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
@@ -22,19 +23,21 @@ import 'package:flutter_app2/models/FirebaseData.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-
 const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
+//int settingsStatus = 0;
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  //Future.wait([GetSettingsStatus()]) ;
+  //log("Main settingsStatus: ${Future.wait([getGlobalSettingsStatus()])}");
   updateToken();
   runApp(new MyApp());
 }
 
 Settings settings;
 FirebaseData firebaseData;
-
 
 class MyApp extends StatelessWidget {
   @override
@@ -54,42 +57,59 @@ class MyApp extends StatelessWidget {
     firebaseData = new FirebaseData.Init();
     settings = new Settings.Defualt();
 
-    GetSettingsStatus();
-//    settings.SetAlreadySet(firebaseData.GetData("Already set"));
-    Widget currentHome;
-    //print("---------------------------------------------------------:"+settingsStatus.first().toString());
-    if (firebaseData.GetSetStatus() == 0) {
-      currentHome = new MySettings();
-    }
-    else {
-      currentHome = new MyHomePage();
-    }
-
-    return new MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Smart Line',
-      theme: new ThemeData(
-        primarySwatch: Colors.teal,
-      ),
-      home: currentHome,
-      routes: routes,
+    return FutureBuilder<List<int>>(
+        future: Future.wait([GetSettingsStatus()]),
+        builder: (context, AsyncSnapshot<List<int>> snapshot) {
+          if (!snapshot.hasData) {
+            return MaterialApp(
+              title: 'Loading..',
+              theme: ThemeData(
+                primarySwatch: Colors.teal,
+              ),
+              home: Scaffold(
+                appBar: AppBar(
+                  title: Text('Loading..'),
+                ),
+                body: Center(
+                  child: CircularProgressIndicator( color: Colors.purple,),
+                ),
+              ),
+            );
+          }
+          Widget currentHome;
+          if (snapshot.data[0] == 0) {
+            currentHome = new MySettings();
+            final databaseReference = FirebaseDatabase.instance.reference();
+            databaseReference.child("Settings").update({
+              'Already set': 1
+            });
+          } else {
+            currentHome = new MyHomePage();
+          }
+          log("snapshot.data[0] = ${snapshot.data[0]}");
+          //sleep(Duration(seconds: 15));
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Smart Line',
+            theme: new ThemeData(
+              primarySwatch: Colors.teal,
+            ),
+            home: currentHome,
+            routes: routes,
+          );
+        }
     );
   }
+}
 
-  void GetSettingsStatus() async {
-    final databaseReference = FirebaseDatabase.instance.reference();
-      databaseReference.child("Settings/Already set").once().then((DataSnapshot data) {
-        int fcmToken = data.value;
-        log("test: "+fcmToken.toString());
-        String newS = fcmToken.toString().substring(0,2);
-        firebaseData.SetData("Already set", newS);
-//        log("firebaseData: "+firebaseData.GetData("Already set").toString());
-
-      });
-
-
-    //print("basket: ${await firebaseData.GetData("Laundry basket")}");
-  }
+Future<int> GetSettingsStatus() async {
+  final databaseReference = FirebaseDatabase.instance.reference();
+  return await databaseReference.child("Settings/Already set") .once() .then((DataSnapshot data) {
+    //settingsStatus = data.value;
+    //log("settingsStatus: $settingsStatus");
+    firebaseData.SetData("Already set", data.value.toString());
+    return data.value;
+  });
 }
 
 class MyHomePage extends StatefulWidget {
@@ -116,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   WeatherDescriptionList weatherList;
-  WeatherData weatherData;//=WeatherData();
+  WeatherData weatherData; //=WeatherData();
 
   @override
   Widget build(BuildContext context) {
@@ -159,64 +179,63 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: IconButton(
-                                  icon: Image.asset(ShowBasketStatus()), // Image.network(
-                                        //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
-                                  iconSize: 70.0,
-                                  tooltip: 'Refresh',
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Image.asset(ShowBasketStatus()),
+                              // Image.network(
+                              //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
+                              iconSize: 70.0,
+                              tooltip: 'Refresh',
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
                                         builder: (context) =>
                                             MyBasketItemPage()));
-                                  },
-                                  color: Colors.white,
-                                ),
-                              )
-                            ]
-                        )
-                    ),
+                              },
+                              color: Colors.white,
+                            ),
+                          )
+                        ])),
                     Center(
                         child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: IconButton(
-                                  icon: Image.asset('Assets/line.PNG'),    //Image.network(
-                                  //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
-                                  iconSize: 70.0,
-                                  tooltip: 'Refresh',
-                                  onPressed: () => null,
-                                  color: Colors.white,
-                                ),
-                              )
-                            ]
-                        )
-                    ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Image.asset('Assets/line.PNG'),
+                              //Image.network(
+                              //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
+                              iconSize: 70.0,
+                              tooltip: 'Refresh',
+                              onPressed: () => null,
+                              color: Colors.white,
+                            ),
+                          )
+                        ])),
                     Center(
                         child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: IconButton(
-                                  icon: Image.network(
-                                      'https://images-na.ssl-images-amazon.com/images/I/61ql%2BQimu-L.png'),
-                                  iconSize: 70.0,
-                                  tooltip: 'Weather Forecast',
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconButton(
+                              icon: Image.network(
+                                  'https://images-na.ssl-images-amazon.com/images/I/61ql%2BQimu-L.png'),
+                              iconSize: 70.0,
+                              tooltip: 'Weather Forecast',
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
                                         builder: (context) => WeatherPage()));
-                                  },
-                                  color: Colors.white,
-
-                                ),
-                              )
-                            ]
-                        )
-                    ),
+                              },
+                              color: Colors.white,
+                            ),
+                          )
+                        ])),
                   ],
                 ),
                 Column(
@@ -224,29 +243,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: weatherData != null ? Weather(weather: weatherData) : Container(),
+                      child: weatherData != null
+                          ? Weather(weather: weatherData)
+                          : Container(),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: isLoading ? CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        valueColor: new AlwaysStoppedAnimation(Colors.purple),
-                      ) : IconButton(
-                        icon: new Icon(Icons.refresh),
-                        tooltip: 'Refresh',
-                        onPressed: loadWeather,
-                        color: Colors.green,
-                      ),
+                      child: isLoading
+                          ? CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor:
+                                  new AlwaysStoppedAnimation(Colors.purple),
+                            )
+                          : IconButton(
+                              icon: new Icon(Icons.refresh),
+                              tooltip: 'Refresh',
+                              onPressed: loadWeather,
+                              color: Colors.green,
+                            ),
                     ),
                   ],
                 ),
                 Center(
-                    child:
-                    Text(GetRecomendaition(), style: TextStyle(fontSize: 25), textAlign: TextAlign.center,),
+                  child: Text(
+                    GetRecomendaition(),
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
                   heightFactor: 5,
                 ),
-              ]
-          ),
+              ]),
           drawer: Drawer(
             // Add a ListView to the drawer. This ensures the user can scroll
             // through the options in the drawer if there isn't enough vertical
@@ -285,8 +311,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.delete_outline),
                   title: Text('Washing basket'),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => MyBasketItemPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyBasketItemPage()));
                   },
                 ),
                 ListTile(
@@ -303,8 +331,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.wb_sunny),
                   title: Text('Weather'),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => WeatherPage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => WeatherPage()));
                   },
                 ),
                 ListTile(
@@ -334,8 +362,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onChanged: (bool position) => SetCover(position),
           ),
           // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
-        )
-    );
+        ));
   }
 
   loadWeather() async {
@@ -349,9 +376,11 @@ class _MyHomePageState extends State<MyHomePage> {
 //    final lat = 32.794044;
 //    final lon = 34.989571;
     final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
     final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
 
     //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
@@ -360,11 +389,11 @@ class _MyHomePageState extends State<MyHomePage> {
       return setState(() {
         var json = jsonDecode(weatherResponse.body);
         weatherList = new WeatherDescriptionList.fromJson(json);
-        weatherData = new WeatherData.fromJson(json['list'][0], json['city']['name']);
+        weatherData =
+            new WeatherData.fromJson(json['list'][0], json['city']['name']);
         isLoading = false;
       });
     }
-
 
     setState(() {
       isLoading = false;
@@ -378,39 +407,28 @@ class _MyHomePageState extends State<MyHomePage> {
 //    while(weatherList == null)
 
     for (var i = 0; i < 10; i++) {
-      if (weatherList == null){
+      if (weatherList == null) {
         return "";
       }
       if (weatherList.list[i] == "Rain")
         return "Not a good time to hang laundry";
-      if (weatherList.list[i] == "Cloud")
-        cloud++;
-      if (weatherList.list[i] == "Clear")
-        clear++;
+      if (weatherList.list[i] == "Cloud") cloud++;
+      if (weatherList.list[i] == "Clear") clear++;
     }
-    if (clear == 10)
-      return "Ideal time to hang laundry";
-    if (clear >= 8)
-      return "Good time to hang laundry";
-    if (clear >= 6)
-      return "Ok time to hang laundry";
+    if (clear == 10) return "Ideal time to hang laundry";
+    if (clear >= 8) return "Good time to hang laundry";
+    if (clear >= 6) return "Ok time to hang laundry";
 
     return "Not rainy, but not a good time to hang laundry";
   }
 }
 
-
-void SetCover(bool position){
+void SetCover(bool position) {
   final databaseReference = FirebaseDatabase.instance.reference();
-  if(position) {
-    databaseReference.child('Cover').update({
-      'Status': 1
-    });
-  }
-  else{
-    databaseReference.child('Cover').update({
-      'Status': 0
-    });
+  if (position) {
+    databaseReference.child('Cover').update({'Status': 1});
+  } else {
+    databaseReference.child('Cover').update({'Status': 0});
   }
 }
 
@@ -431,16 +449,15 @@ class WeatherPage extends StatefulWidget {
   }
 }
 
-
 class _WeatherPage extends State<WeatherPage> {
   bool isLoading = false;
-  WeatherData weatherData;//=WeatherData();
-  ForecastData forecastData;//=ForecastData();
+  WeatherData weatherData; //=WeatherData();
+  ForecastData forecastData; //=ForecastData();
   CoordinateTable coordinateTable = new CoordinateTable.initTable();
   String city = settings.GetLocation();
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     loadWeather();
     messageHandler(context);
@@ -459,59 +476,59 @@ class _WeatherPage extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-
     //loadWeather();
-    sleep(Duration(seconds : 2));
+    sleep(Duration(seconds: 2));
     return Scaffold(
-      backgroundColor:Colors.yellow[40],
-      appBar: AppBar(
-        title: Text('      Weather Forecast'),
-        backgroundColor: Colors.teal,
-      ),
+        backgroundColor: Colors.yellow[40],
+        appBar: AppBar(
+          title: Text('      Weather Forecast'),
+          backgroundColor: Colors.teal,
+        ),
         body: Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          Expanded(
             child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: weatherData != null ? Weather(weather: weatherData) : Container(),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: weatherData != null
+                      ? Weather(weather: weatherData)
+                      : Container(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                          valueColor: new AlwaysStoppedAnimation(Colors.purple),
+                        )
+                      : IconButton(
+                          icon: new Icon(Icons.refresh),
+                          tooltip: 'Refresh',
+                          onPressed: loadWeather,
+                          color: Colors.green,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: isLoading ? CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: new AlwaysStoppedAnimation(Colors.purple),
-                          ) : IconButton(
-                            icon: new Icon(Icons.refresh),
-                            tooltip: 'Refresh',
-                            onPressed: loadWeather,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: 200.0,
-                        child: forecastData != null ? ListView.builder(
-                            itemCount: forecastData.list.length,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) => WeatherItem(weather: forecastData.list.elementAt(index))
-                        ) : Container(),
-                      ),
-                    ),
-                  )
-                ]
-            )
-        )
-    );
+                ),
+              ],
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 200.0,
+                child: forecastData != null
+                    ? ListView.builder(
+                        itemCount: forecastData.list.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) => WeatherItem(
+                            weather: forecastData.list.elementAt(index)))
+                    : Container(),
+              ),
+            ),
+          )
+        ])));
   }
 
   loadWeather() async {
@@ -524,9 +541,11 @@ class _WeatherPage extends State<WeatherPage> {
 //    final lat = 32.794044;
 //    final lon = 34.989571;
     final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
     final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&'+newlatlon);
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
 
     //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
 
@@ -534,21 +553,18 @@ class _WeatherPage extends State<WeatherPage> {
         forecastResponse.statusCode == 200) {
       return setState(() {
         var json = jsonDecode(weatherResponse.body);
-        weatherData = new WeatherData.fromJson(json['list'][0], json['city']['name']);
+        weatherData =
+            new WeatherData.fromJson(json['list'][0], json['city']['name']);
         forecastData = new ForecastData.fromJson(json);
         isLoading = false;
       });
     }
     return "images/emptyBasket.png";
 
-
-
-
     setState(() {
       isLoading = false;
     });
   }
-
 }
 
 class MyItemsPage extends StatefulWidget {
@@ -565,18 +581,15 @@ class MyItemsPage extends StatefulWidget {
 class _MyItemsPageState extends State<MyItemsPage> {
   @override
   Widget build(BuildContext context) {
-    var button = new IconButton(icon: new Icon(Icons.arrow_back), onPressed: _onButtonPressed);
+    var button = new IconButton(
+        icon: new Icon(Icons.arrow_back), onPressed: _onButtonPressed);
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
       body: new Container(
         child: new Column(
-          children: <Widget>[
-            new Text('Item1'),
-            new Text('Item2'),
-            button
-          ],
+          children: <Widget>[new Text('Item1'), new Text('Item2'), button],
         ),
       ),
       floatingActionButton: new FloatingActionButton(
@@ -587,14 +600,12 @@ class _MyItemsPageState extends State<MyItemsPage> {
     );
   }
 
-  void _onFloatingActionButtonPressed() {
-  }
+  void _onFloatingActionButtonPressed() {}
 
   void _onButtonPressed() {
     Navigator.pop(context);
   }
 }
-
 
 class MyBasketItemPage extends StatefulWidget {
   MyBasketItemPage({Key key, this.title}) : super(key: key);
@@ -618,63 +629,66 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
         backgroundColor: Colors.teal,
       ),
       body: new Container(
-        child: new Column(
-            children: <Widget>[
-              Column(
-                children: [
-                  Image.asset(ShowBasketStatus()),
-                  Text(GetBasketStatus(), style: TextStyle(fontSize: 25), textAlign: TextAlign.center,)
-                ],
+        child: new Column(children: <Widget>[
+          Column(
+            children: [
+              Image.asset(ShowBasketStatus()),
+              Text(
+                GetBasketStatus(),
+                style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
               )
-            ]
-        ),
+            ],
+          )
+        ]),
       ),
     );
   }
-  String GetBasketStatus(){
+
+  String GetBasketStatus() {
     int basketStatus = firebaseData.GetData("Laundry basket");
 
-    if (basketStatus == 0){
+    if (basketStatus == 0) {
       return "Your basket is empty";
     }
-    if (basketStatus == 1){
+    if (basketStatus == 1) {
       return "You don't have much laundry in your basket";
     }
-    if (basketStatus == 2){
+    if (basketStatus == 2) {
       return "You have a lot of laundry in your basket";
     }
-    if (basketStatus == 3){
+    if (basketStatus == 3) {
       return "Your basket is full";
     }
     return "";
   }
 }
 
-String ShowBasketStatus(){
+String ShowBasketStatus() {
   int basketStatus = firebaseData.GetData("Laundry basket");
 
-  if (basketStatus == 0){
+  if (basketStatus == 0) {
     return "images/basket0.png";
   }
-  if (basketStatus == 1){
+  if (basketStatus == 1) {
     return "images/basket1.png";
   }
-  if (basketStatus == 2){
+  if (basketStatus == 2) {
     return "images/basket2.png";
   }
-  if (basketStatus == 3){
+  if (basketStatus == 3) {
     return "images/basket3.png";
   }
   return "images/basket0.png";
 }
 
-class CoordinateTable{
+class CoordinateTable {
   Map coordinatesMap;
 
   CoordinateTable({this.coordinatesMap});
 
-   factory CoordinateTable.initTable(){
-    Map map  = new Map();
+  factory CoordinateTable.initTable() {
+    Map map = new Map();
     map['haifa'] = 'lat=32.794044&lon=34.989571';
     map['tel aviv'] = 'lat=32.083333&lon=34.7999968';
     map['jerusalem'] = 'lat=31.76904&lon=35.21633';
@@ -692,7 +706,7 @@ class CoordinateTable{
     map['efrat'] = 'lat=31.653589&lon=35.149934';
 
     return CoordinateTable(
-        coordinatesMap: map,
+      coordinatesMap: map,
     );
   }
 }
@@ -740,11 +754,11 @@ class _MySettingsState extends State<MySettings> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: DropdownButton<String>(
-                focusColor:Colors.white,
+                focusColor: Colors.white,
                 value: _chosenBasketallert,
                 //elevation: 5,
                 style: TextStyle(color: Colors.white),
-                iconEnabledColor:Colors.black,
+                iconEnabledColor: Colors.black,
                 items: <String>[
                   'Yes, when it\'s almost full',
                   'Yes, when it\'s totaly full',
@@ -752,10 +766,13 @@ class _MySettingsState extends State<MySettings> {
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value,style:TextStyle(color:Colors.black),),
+                    child: Text(
+                      value,
+                      style: TextStyle(color: Colors.black),
+                    ),
                   );
                 }).toList(),
-                hint:Text(
+                hint: Text(
                   "Get notification for the basket status",
                   style: TextStyle(
                       color: Colors.black,
@@ -774,21 +791,24 @@ class _MySettingsState extends State<MySettings> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: DropdownButton<String>(
-                focusColor:Colors.white,
+                focusColor: Colors.white,
                 value: _chosenGoodDay,
                 //elevation: 5,
                 style: TextStyle(color: Colors.white),
-                iconEnabledColor:Colors.black,
+                iconEnabledColor: Colors.black,
                 items: <String>[
                   'Yes',
                   'No',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value,style:TextStyle(color:Colors.black),),
+                    child: Text(
+                      value,
+                      style: TextStyle(color: Colors.black),
+                    ),
                   );
                 }).toList(),
-                hint:Text(
+                hint: Text(
                   "Get notification in case of a good day?",
                   style: TextStyle(
                       color: Colors.black,
@@ -807,21 +827,24 @@ class _MySettingsState extends State<MySettings> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: DropdownButton<String>(
-                focusColor:Colors.white,
+                focusColor: Colors.white,
                 value: _chosenPolicy,
                 //elevation: 5,
                 style: TextStyle(color: Colors.white),
-                iconEnabledColor:Colors.black,
+                iconEnabledColor: Colors.black,
                 items: <String>[
                   'Cover Automatically',
                   'Ask me before covering',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value,style:TextStyle(color:Colors.black),),
+                    child: Text(
+                      value,
+                      style: TextStyle(color: Colors.black),
+                    ),
                   );
                 }).toList(),
-                hint:Text(
+                hint: Text(
                   "Default behaviour in case of rain",
                   style: TextStyle(
                       color: Colors.black,
@@ -840,11 +863,11 @@ class _MySettingsState extends State<MySettings> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: DropdownButton<String>(
-                focusColor:Colors.white,
+                focusColor: Colors.white,
                 value: _chosenCity,
                 //elevation: 5,
                 style: TextStyle(color: Colors.white),
-                iconEnabledColor:Colors.black,
+                iconEnabledColor: Colors.black,
                 items: <String>[
                   'Haifa',
                   'Tel Aviv',
@@ -864,17 +887,20 @@ class _MySettingsState extends State<MySettings> {
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value,style:TextStyle(color:Colors.black),),
+                    child: Text(
+                      value,
+                      style: TextStyle(color: Colors.black),
+                    ),
                   );
                 }).toList(),
-                hint: FittedBox  (
+                hint: FittedBox(
                   fit: BoxFit.fitWidth,
-                  child:Text(
-                  "Smart line location",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500),
+                  child: Text(
+                    "Smart line location",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
                 onChanged: (String value) {
@@ -911,15 +937,13 @@ class _MySettingsState extends State<MySettings> {
   }
 }
 
-void updateToken() async{
+void updateToken() async {
   FirebaseMessaging _fcm = FirebaseMessaging.instance;
   String fcmToken = await _fcm.getToken();
   log(fcmToken);
   final databaseReference = FirebaseDatabase.instance.reference();
-  if(fcmToken !=null){
-    databaseReference.child('Tokens').update({
-      user: fcmToken
-    });
+  if (fcmToken != null) {
+    databaseReference.child('Tokens').update({user: fcmToken});
   }
 }
 
@@ -928,13 +952,18 @@ void messageHandler(BuildContext context) {
   FirebaseMessaging.onMessage.listen((RemoteMessage event) {
     handleMessage(event.data["body"]);
     print(event.notification?.body);
-    var seperateCharIndex =event.notification?.body.indexOf(":");
+    var seperateCharIndex = event.notification?.body.indexOf(":");
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(event.notification?.title, textAlign: TextAlign.center,),
-            content: Text("${event.notification?.body}", textAlign: TextAlign.center), //.substring(0,seperateCharIndex)} and status is ${event.notification?.body.substring(seperateCharIndex)}"),
+            title: Text(
+              event.notification?.title,
+              textAlign: TextAlign.center,
+            ),
+            content: Text("${event.notification?.body}",
+                textAlign: TextAlign.center),
+            //.substring(0,seperateCharIndex)} and status is ${event.notification?.body.substring(seperateCharIndex)}"),
             actions: [
               TextButton(
                 child: Text("Ok"),
@@ -959,10 +988,11 @@ Future<void> _messageHandler(RemoteMessage message) async {
   //handleMessage(message.notification?.title); //need?
 }
 
-void handleMessage(String field) { //For Eli
+void handleMessage(String field) {
+  //For Eli
   print("handleMessage was called");
   final databaseReference = FirebaseDatabase.instance.reference();
-  databaseReference.child("$field/Status").once().then((DataSnapshot data){
+  databaseReference.child("$field/Status").once().then((DataSnapshot data) {
     print("$field/Status");
     print(data.value);
     int value = int.parse(data.value);
@@ -970,23 +1000,23 @@ void handleMessage(String field) { //For Eli
   });
 }
 
-int MakeInt(String strnum){
-  if (strnum == '0'){
+int MakeInt(String strnum) {
+  if (strnum == '0') {
     return 0;
   }
-  if (strnum == '1'){
+  if (strnum == '1') {
     return 1;
   }
-  if (strnum == '2'){
+  if (strnum == '2') {
     return 2;
   }
-  if (strnum == '3'){
+  if (strnum == '3') {
     return 3;
   }
-  if (strnum == '4'){
+  if (strnum == '4') {
     return 4;
   }
-  if (strnum == '5'){
+  if (strnum == '5') {
     return 5;
   }
   return 0;
