@@ -32,7 +32,7 @@ void main() async {
   runApp(new MyApp());
 }
 
-Settings settings = new Settings.Defualt();
+Settings settings;
 FirebaseData firebaseData;
 
 class MyApp extends StatelessWidget {
@@ -46,6 +46,17 @@ class MyApp extends StatelessWidget {
 
     messageHandler(context);
     firebaseData = new FirebaseData.Init();
+    settings = new Settings.Defualt();
+    settings.SetAlreadySet(firebaseData.GetData("Laundry basket"));
+
+
+    Widget currentHome;
+    if(settings.GetAlreadySet() == 0){
+      currentHome = new MySettings();
+    }
+    else {
+      currentHome = new MyHomePage();
+    }
 
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -53,7 +64,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: new MySettings(),
+      home: currentHome,
       routes: routes,
     );
   }

@@ -1,13 +1,17 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class Settings {
   bool autoCover;
   String city;
   bool goodDayAllert;
   String basketAllert;
+  int alreadySet;
 
-  Settings({this.city, this.autoCover, this.goodDayAllert, this.basketAllert});
+  Settings({this.alreadySet, this.city, this.autoCover, this.goodDayAllert, this.basketAllert});
 
   factory Settings.Defualt() {
     return Settings(
+      alreadySet: 0,
       autoCover: false,
       city: 'haifa',
       goodDayAllert: false,
@@ -52,5 +56,12 @@ class Settings {
   String GetBasketCapacityAllert(){
     return this.basketAllert;
   }
+  int GetAlreadySet(){
+    return this.alreadySet;
+  }
+  void SetAlreadySet(int status){
+    this.alreadySet = status;
+  }
 
 }
+
