@@ -23,9 +23,11 @@ import 'package:flutter_app2/models/FirebaseData.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
+const String user = "Barel"; // "Eliad", "Eliezer" , "Barel"
+String MyToken;
+_MyHomePageState HomePageState =_MyHomePageState();
+CoverSwitch coverSwitch;
 //int settingsStatus = 0;
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,13 +46,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var routes = <String, WidgetBuilder>{
       MyHomePage.routeName: (BuildContext context) =>
-      new MyHomePage(title: "Smart Line Home Page"),
+          new MyHomePage(title: "Smart Line Home Page"),
       MyItemsPage.routeName: (BuildContext context) =>
-      new MyItemsPage(title: "MyItemsPage"),
+          new MyItemsPage(title: "MyItemsPage"),
       WeatherPage.routeName: (BuildContext context) =>
-      new WeatherPage(title: "WeatherPage"),
+          new WeatherPage(title: "WeatherPage"),
       MySettings.routeName: (BuildContext context) =>
-      new MySettings(title: "MySettings"),
+          new MySettings(title: "MySettings"),
     };
 
     messageHandler(context);
@@ -62,6 +64,7 @@ class MyApp extends StatelessWidget {
         builder: (context, AsyncSnapshot<List<int>> snapshot) {
           if (!snapshot.hasData) {
             return MaterialApp(
+              debugShowCheckedModeBanner: false,
               title: 'Loading..',
               theme: ThemeData(
                 primarySwatch: Colors.teal,
@@ -71,7 +74,9 @@ class MyApp extends StatelessWidget {
                   title: Text('Loading..'),
                 ),
                 body: Center(
-                  child: CircularProgressIndicator( color: Colors.purple,),
+                  child: CircularProgressIndicator(
+                    color: Colors.purple,
+                  ),
                 ),
               ),
             );
@@ -80,9 +85,9 @@ class MyApp extends StatelessWidget {
           if (snapshot.data[0] == 0) {
             currentHome = new MySettings();
             final databaseReference = FirebaseDatabase.instance.reference();
-            databaseReference.child("Settings").update({
-              'Already set': 1
-            });
+            databaseReference
+                .child("Users/$user/Settings")
+                .update({"Already set": 1});
           } else {
             currentHome = new MyHomePage();
           }
@@ -97,16 +102,17 @@ class MyApp extends StatelessWidget {
             home: currentHome,
             routes: routes,
           );
-        }
-    );
+        });
   }
 }
 
 Future<int> GetSettingsStatus() async {
   final databaseReference = FirebaseDatabase.instance.reference();
-  return await databaseReference.child("Settings/Already set") .once() .then((DataSnapshot data) {
-    //settingsStatus = data.value;
-    //log("settingsStatus: $settingsStatus");
+  return await databaseReference
+      .child("Users/$user/Settings/Already set")
+      .once()
+      .then((DataSnapshot data) {
+    log("settingsStatus for $user: $data.value");
     firebaseData.SetData("Already set", data.value.toString());
     return data.value;
   });
@@ -119,7 +125,7 @@ class MyHomePage extends StatefulWidget {
   static const String routeName = "/MyHomePage ";
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => HomePageState;//_MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -128,12 +134,23 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isLoading = false;
   CoordinateTable coordinateTable = new CoordinateTable.initTable();
   String city = settings.GetLocation();
+  //CoverSwitch coverSwitch;
+  Widget liteSwitch;
 
   void initState() {
     //updateToken();
+    coverSwitch = CoverSwitch(this.callback);
+    liteSwitch = coverSwitch;
     messageHandler(context);
     loadWeather();
   }
+
+  void callback(Widget nextSwitch) {
+    setState(() {
+      liteSwitch = nextSwitch;
+    });
+  }
+
 
   WeatherDescriptionList weatherList;
   WeatherData weatherData; //=WeatherData();
@@ -349,18 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
 
-          floatingActionButton: LiteRollingSwitch(
-            // tooltip: 'Cover the laundry',
-            value: false,
-            textOn: "Covered",
-            textOff: " Uncovered",
-            textSize: 13.0,
-            colorOn: Colors.lightGreen,
-            colorOff: Colors.redAccent,
-            iconOn: Icons.power_settings_new,
-            iconOff: Icons.power_settings_new,
-            onChanged: (bool position) => SetCover(position),
-          ),
+          floatingActionButton: liteSwitch,
           // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
         ));
   }
@@ -423,7 +429,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-void SetCover(bool position) {
+
+void SetCoverDataBase(bool position) {
   final databaseReference = FirebaseDatabase.instance.reference();
   if (position) {
     databaseReference.child('Cover').update({'Status': 1});
@@ -431,6 +438,84 @@ void SetCover(bool position) {
     databaseReference.child('Cover').update({'Status': 0});
   }
 }
+
+
+
+class CoverSwitch extends StatefulWidget{
+  Function callback;
+
+  CoverSwitch(this.callback);
+
+  void SetState(bool state) {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    if (state) {
+      databaseReference.child('Cover').update({'Status': 1});
+    } else {
+      databaseReference.child('Cover').update({'Status': 0});
+    }
+    //liteRollingSwitch.onChanged(state);
+    //liteRollingSwitch.createState();
+    //coverSwitch.SetState(true);
+  //_MyHomePageState().SetCover(state);
+  callback(new _coverSwitchState().NewSwitch(state));
+  }
+/*
+  LiteRollingSwitch liteRollingSwitch = LiteRollingSwitch(
+  // tooltip: 'Cover the laundry',
+  value: false,
+  textOn: "Covered",
+  textOff: " Uncovered",
+  textSize: 13.0,
+  colorOn: Colors.lightGreen,
+  colorOff: Colors.redAccent,
+  iconOn: Icons.power_settings_new,
+  iconOff: Icons.power_settings_new,
+  onChanged: (bool position) => SetCover(position),
+  );
+
+ */
+
+
+  @override
+  _coverSwitchState createState() => new _coverSwitchState();
+
+}
+
+class _coverSwitchState extends State<CoverSwitch> {
+
+  @override
+  Widget build(BuildContext context) {
+    return LiteRollingSwitch(
+      // tooltip: 'Cover the laundry',
+      value: false,
+      textOn: "Covered",
+      textOff: " Uncovered",
+      textSize: 13.0,
+      colorOn: Colors.lightGreen,
+      colorOff: Colors.redAccent,
+      iconOn: Icons.power_settings_new,
+      iconOff: Icons.power_settings_new,
+      onChanged: (bool position) => SetCoverDataBase(position),
+    );
+  }
+
+  Widget NewSwitch(bool state) {
+    return LiteRollingSwitch(
+      // tooltip: 'Cover the laundry',
+      value: state,
+      textOn: "Covered",
+      textOff: " Uncovered",
+      textSize: 13.0,
+      colorOn: Colors.lightGreen,
+      colorOff: Colors.redAccent,
+      iconOn: Icons.power_settings_new,
+      iconOff: Icons.power_settings_new,
+      onChanged: (bool position) => SetCoverDataBase(position),
+    );
+  }
+}
+
+
 
 class WeatherPage extends StatefulWidget {
   WeatherPage({Key key, this.title}) : super(key: key);
@@ -869,21 +954,21 @@ class _MySettingsState extends State<MySettings> {
                 style: TextStyle(color: Colors.white),
                 iconEnabledColor: Colors.black,
                 items: <String>[
-                  'Haifa',
-                  'Tel Aviv',
-                  'Jerusalem',
                   'Ariel',
-                  'Netanya',
-                  'Eilat',
-                  'Beersheba',
-                  'Nazareth',
-                  'Rishon LeẔiyyon',
                   'Ashqelon',
-                  'Nahariyya',
+                  'Beersheba',
+                  'Efrat',
+                  'Eilat',
+                  'Haifa',
                   'Herzelia',
+                  'Jerusalem',
+                  'Nahariyya',
+                  'Nazareth',
+                  'Netanya',
                   'Qiryat Shemona',
                   'Qatsrin',
-                  'Efrat',
+                  'Rishon LeẔiyyon',
+                  'Tel Aviv',
                 ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -940,6 +1025,7 @@ class _MySettingsState extends State<MySettings> {
 void updateToken() async {
   FirebaseMessaging _fcm = FirebaseMessaging.instance;
   String fcmToken = await _fcm.getToken();
+  MyToken = fcmToken;
   log(fcmToken);
   final databaseReference = FirebaseDatabase.instance.reference();
   if (fcmToken != null) {
@@ -950,9 +1036,10 @@ void updateToken() async {
 void messageHandler(BuildContext context) {
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    handleMessage(event.data["body"]);
     print(event.notification?.body);
-    var seperateCharIndex = event.notification?.body.indexOf(":");
+    handleMessageOnMessage(event.data["body"], context);
+    /*
+    handleMessage(event.data["body"]);
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -974,6 +1061,8 @@ void messageHandler(BuildContext context) {
             ],
           );
         });
+
+     */
   });
   FirebaseMessaging.onMessageOpenedApp.listen((message) {
     handleMessage(message.data["body"]); //need?
@@ -989,7 +1078,6 @@ Future<void> _messageHandler(RemoteMessage message) async {
 }
 
 void handleMessage(String field) {
-  //For Eli
   print("handleMessage was called");
   final databaseReference = FirebaseDatabase.instance.reference();
   databaseReference.child("$field/Status").once().then((DataSnapshot data) {
@@ -998,6 +1086,45 @@ void handleMessage(String field) {
     int value = int.parse(data.value);
     firebaseData.SetData(field, data.value);
   });
+}
+
+void handleMessageOnMessageOpenedApp(String field) {}
+
+void handleMessageOnMessage(String field, BuildContext context) {
+  switch (field) {
+    case "Rain":
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            //if cover is open and there are clothes on the line - check database
+            return AlertDialog(
+              title: Text(
+                field + " Allert",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                  "Your clothes are getting wet! would you like to close the cover?",
+                  textAlign: TextAlign.center),
+              actions: [
+                TextButton(
+
+                  child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    coverSwitch.SetState(true);
+                  },
+                ),
+              ],
+            );
+          });
+      break;
+  }
 }
 
 int MakeInt(String strnum) {
