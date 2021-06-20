@@ -61,8 +61,8 @@ class FirebaseData {
     return dataMap["Already set"];
   }
 
-  void SetData(String field, String data){
-    if (data == "0"){
+  void SetData(String field, int data){
+    if (data == 0){
       dataMap[field] = 0;
     }
     else{
