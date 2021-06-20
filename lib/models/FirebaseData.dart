@@ -33,6 +33,7 @@ class FirebaseData {
     databaseReference.child('Settings/Already set').once().then((DataSnapshot data){
       map['Already set'] = data.value;
     });
+
     return FirebaseData(
       dataMap: map,
     );
@@ -69,6 +70,7 @@ class FirebaseData {
       dataMap[field] = 1;
     }
   }
+
   loadData(Map map) async {
     final databaseReference = FirebaseDatabase.instance.reference();
     await databaseReference.child("Cover/Status").once().then((DataSnapshot data){

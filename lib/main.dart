@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
                 ),
                 body: Center(
                   child: CircularProgressIndicator(
-                    color: Colors.purple,
+                    backgroundColor: Colors.purple,
                   ),
                 ),
               ),
@@ -113,7 +113,7 @@ Future<int> GetSettingsStatus() async {
       .once()
       .then((DataSnapshot data) {
     log("settingsStatus for $user: $data.value");
-    firebaseData.SetData("Already set", data.value.toString());
+    firebaseData.SetData("Already set", data.value);
     return data.value;
   });
 }
@@ -227,7 +227,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
                               iconSize: 70.0,
                               tooltip: 'Refresh',
-                              onPressed: () => null,
+                              onPressed: () {
+                                  Navigator.push(context, MaterialPageRoute(
+                                             builder: (context) => MyLineItemPage()));
+                              },
                               color: Colors.white,
                             ),
                           )
@@ -308,9 +311,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.settings),
                   title: Text('Settings'),
                   onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
+                    Navigator.push(context,MaterialPageRoute(
+                                 builder: (context) => MySettings()));
                     Navigator.pop(context);
                   },
                 ),
@@ -1127,24 +1129,117 @@ void handleMessageOnMessage(String field, BuildContext context) {
   }
 }
 
-int MakeInt(String strnum) {
-  if (strnum == '0') {
-    return 0;
+
+class MyLineItemPage extends StatefulWidget {
+  MyLineItemPage({Key key, this.title}) : super(key: key);
+
+  static const String routeName = "/MyLineItemPage";
+
+  final String title;
+
+  @override
+  _MyLineItemPage createState() => new _MyLineItemPage();
+}
+
+class _MyLineItemPage extends State<MyLineItemPage> {
+  var basketStatus = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: AppBar(
+        title: Text('          Line Status'),
+        backgroundColor: Colors.teal,
+      ),
+      body: new Container(
+        child: new Column(children: <Widget>[
+          Column(
+            children: [
+              Image.asset(ShowLineStatus()),
+              Text(
+                GetLineStatus(),
+                style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
+              ),
+              Image.asset(ShowSunLightStatus()),
+              Text(
+                GetSunLightStatus(),
+                style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
+              )
+            ],
+          )
+        ]),
+      ),
+    );
   }
-  if (strnum == '1') {
-    return 1;
+
+  String GetLineStatus() {
+    int clothesStatus = firebaseData.GetData("Clothes on line");
+
+    if (clothesStatus == 0) {
+      return "You have no clothes on your Line";
+    }
+    if (clothesStatus == 1) {
+      return "You have clothes on your Line";
+    }
+    return "";
   }
-  if (strnum == '2') {
-    return 2;
+
+  String GetSunLightStatus() {
+    int sunLightStatus = firebaseData.GetData("Sun Light");
+
+
+    if (sunLightStatus == 1) {
+      return "sun light intensity is 1 in 5";
+    }
+    if (sunLightStatus == 2) {
+      return "sun light intensity is 2 in 5";
+    }
+    if (sunLightStatus == 3) {
+      return "sun light intensity is 3 in 5";
+    }
+    if (sunLightStatus == 4) {
+      return "sun light intensity is 4 in 5";
+    }
+    if (sunLightStatus == 5) {
+      return "sun light intensity is 5 in 5";
+    }
+    return "";
   }
-  if (strnum == '3') {
-    return 3;
+}
+
+String ShowLineStatus() {
+  int clothesStatus = firebaseData.GetData("Clothes on line");
+
+  if (clothesStatus == 0) {
+    return "images/barels graphics.png";
   }
-  if (strnum == '4') {
-    return 4;
+  if (clothesStatus == 1) {
+    return 'Assets/line.PNG';
   }
-  if (strnum == '5') {
-    return 5;
+
+  return "images/barels graphics.png";
+}
+
+String ShowSunLightStatus() {
+  int sunLightStatus = firebaseData.GetData("Sun Light");
+
+  if (sunLightStatus == 1) {
+    return 'Assets/waiting.png';
   }
-  return 0;
+  if (sunLightStatus == 2) {
+    return "images/waiting.png";
+  }
+  if (sunLightStatus == 3) {
+    return 'Assets/waiting.PNG';
+  }
+  if (sunLightStatus == 4) {
+    return "images/waiting.png";
+  }
+  if (sunLightStatus == 5) {
+    return 'Assets/waiting.PNG';
+  }
+
+  return "images/waiting.png";
 }
