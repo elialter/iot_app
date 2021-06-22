@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
+import 'package:flutter_app2/main.dart';
 
 class FirebaseData {
   Map dataMap;
@@ -30,7 +31,7 @@ class FirebaseData {
     databaseReference.child('Sun Light/Status').once().then((DataSnapshot data){
       map['Sun Light'] =data.value;
     });
-    databaseReference.child('Settings/Already set').once().then((DataSnapshot data){
+    databaseReference.child('"Users/$user/Settings/Already set').once().then((DataSnapshot data){
       map['Already set'] = data.value;
     });
 
@@ -45,7 +46,7 @@ class FirebaseData {
     final databaseReference = FirebaseDatabase.instance.reference();
     if (field == "Settings/Already set"){
        newField = "Already set";
-       databaseReference.child("Settings/Already set").once().then((DataSnapshot data) {
+       databaseReference.child("Users/$user/Settings/Already set").once().then((DataSnapshot data) {
          dataMap[newField] = data.value;
        });
     }
@@ -88,7 +89,7 @@ class FirebaseData {
     await databaseReference.child('Sun Light/Status').once().then((DataSnapshot data){
       map['Sun Light'] =data.value;
     });
-    await databaseReference.child('Settings/Already set').once().then((DataSnapshot data){
+    await databaseReference.child('Users/$user/Settings/Already set').once().then((DataSnapshot data){
       map['Already set'] = data.value;
     });
   }

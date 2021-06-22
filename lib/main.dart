@@ -23,7 +23,7 @@ import 'package:flutter_app2/models/FirebaseData.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-const String user = "Barel"; // "Eliad", "Eliezer" , "Barel"
+const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
 String MyToken;
 _MyHomePageState HomePageState =_MyHomePageState();
 CoverSwitch coverSwitch;
@@ -314,16 +314,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   onTap: () {
                     Navigator.push(context,MaterialPageRoute(
                                  builder: (context) => MySettings()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('History'),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
                   },
                 ),
                 ListTile(
