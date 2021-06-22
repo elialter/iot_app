@@ -89,6 +89,7 @@ class MyApp extends StatelessWidget {
                 .child("Users/$user/Settings")
                 .update({"Already set": 1});
           } else {
+            firebaseData.SetData("Already set", 1);
             currentHome = new MyHomePage();
           }
           log("snapshot.data[0] = ${snapshot.data[0]}");
@@ -313,7 +314,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   onTap: () {
                     Navigator.push(context,MaterialPageRoute(
                                  builder: (context) => MySettings()));
-                    Navigator.pop(context);
                   },
                 ),
                 ListTile(
@@ -1005,8 +1005,15 @@ class _MySettingsState extends State<MySettings> {
                   color: Colors.teal, borderRadius: BorderRadius.circular(20)),
               child: FlatButton(
                 onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => MyHomePage()));
+                  if (firebaseData.GetSetStatus() == 0) {
+                    firebaseData.SetData("Already set", 1);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => MyHomePage()));
+                  }
+                  else{
+                    Navigator.pop(context);
+                  }
                 },
                 child: Text(
                   'Set Settings',
