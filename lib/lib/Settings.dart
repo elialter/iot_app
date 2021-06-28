@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_app2/main.dart';
 
 class Settings {
   bool autoCover;
@@ -63,7 +64,14 @@ class Settings {
   }
 
   String GetLocation(){
-    return this.city;
+     return this.city;
+  }
+
+  void UpdateCity() {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    databaseReference.child("Settings/City").once().then((DataSnapshot data) {
+      this.city = data.value.toString();
+    });
   }
 
   bool GetCoverPolicy(){

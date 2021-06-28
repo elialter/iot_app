@@ -124,6 +124,7 @@ class MyApp extends StatelessWidget {
 }
 
 Future<int> GetSettingsStatus() async {
+  settings.UpdateCity();
   final databaseReference = FirebaseDatabase.instance.reference();
   return await databaseReference
       .child("Users/$user/Settings/Already set")
@@ -160,264 +161,8 @@ class _MyHomePageState extends State<MyHomePage> {
       home: HomePageLevel(),
     );
   }
-/*
-  @override
-  bool isLoading = false;
-  CoordinateTable coordinateTable = new CoordinateTable.initTable();
-  String city = settings.GetLocation();
-  //CoverSwitch coverSwitch;
-  Widget liteSwitch;
-
-  void initState() {
-    //updateToken();
-    coverSwitch = CoverSwitch(this.callback, false);
-    liteSwitch = coverSwitch;
-    messageHandler(context);
-    loadWeather();
-  }
-
-  void callback(Widget nextSwitch) {
-    setState(() {
-      liteSwitch = nextSwitch;
-    });
-  }
-
-  Widget build(BuildContext context) {
-    Firebase.initializeApp();
-    final databaseReference = FirebaseDatabase.instance.reference();
-    //add objects to database
-    /*
-    databaseReference.child("Cover").set({
-      'Status': 'closed'
-    });
-
-     */
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Smart Line',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-        ),
-        home: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            title: Text('            Smart Line'),
-            actions: [
-              Icon(Icons.favorite),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                //child: Icon(Icons.search),
-              ),
-              Icon(Icons.more_vert),
-            ],
-          ),
-          body: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Center(
-                        child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconButton(
-                              icon: Image.asset(ShowBasketStatus()),
-                              // Image.network(
-                              //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
-                              iconSize: 70.0,
-                              tooltip: 'Refresh',
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            MyBasketItemPage()));
-                              },
-                              color: Colors.white,
-                            ),
-                          )
-                        ])),
-                    Center(
-                        child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconButton(
-                              icon: Image.asset('Assets/line.PNG'),
-                              //Image.network(
-                              //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
-                              iconSize: 70.0,
-                              tooltip: 'Refresh',
-                              onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(
-                                             builder: (context) => MyLineItemPage()));
-                              },
-                              color: Colors.white,
-                            ),
-                          )
-                        ])),
-                    Center(
-                        child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconButton(
-                              icon: Image.network(
-                                  'https://images-na.ssl-images-amazon.com/images/I/61ql%2BQimu-L.png'),
-                              iconSize: 70.0,
-                              tooltip: 'Weather Forecast',
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => WeatherPage()));
-                              },
-                              color: Colors.white,
-                            ),
-                          )
-                        ])),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: weatherDataHome != null
-                          ? Weather(weather: weatherDataHome)
-                          : Container(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: isLoading
-                          ? CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              valueColor:
-                                  new AlwaysStoppedAnimation(Colors.purple),
-                            )
-                          : IconButton(
-                              icon: new Icon(Icons.refresh),
-                              tooltip: 'Refresh',
-                              onPressed: loadWeather,
-                              color: Colors.green,
-                            ),
-                    ),
-                  ],
-                ),
-                Center(
-                  child: Text(
-                    GetRecomendaition(),
-                    style: TextStyle(fontSize: 25),
-                    textAlign: TextAlign.center,
-                  ),
-                  heightFactor: 5,
-                ),
-              ]),
-          drawer: Drawer(
-            // Add a ListView to the drawer. This ensures the user can scroll
-            // through the options in the drawer if there isn't enough vertical
-            // space to fit everything.
-            child: ListView(
-              // Important: Remove any padding from the ListView.
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  child: Text('Menu'),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('Settings'),
-                  onTap: () {
-                    Navigator.push(context,MaterialPageRoute(
-                                 builder: (context) => MySettings()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.delete_outline),
-                  title: Text('Washing basket'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MyBasketItemPage()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.schedule),
-                  title: Text('Schedule cover'),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.wb_sunny),
-                  title: Text('Weather'),
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => WeatherPage()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.message),
-                  title: Text('Contact us'),
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ContactUsItemPage()));
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          floatingActionButton: liteSwitch,
-          // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
-        ));
-  }
-
-  loadWeather() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    String newlatlon;
-    newlatlon = coordinateTable.coordinatesMap[city];
-
-    final weatherResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
-            newlatlon);
-    final forecastResponse = await http.get(
-        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
-            newlatlon);
-
-    if (weatherResponse.statusCode == 200 &&
-        forecastResponse.statusCode == 200) {
-      return setState(() {
-        var json = jsonDecode(weatherResponse.body);
-        weatherListHome = new WeatherDescriptionList.fromJson(json);
-        weatherDataHome = new WeatherData.fromJson(json['list'][0], json['city']['name']);
-
-        isLoading = false;
-      });
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-*/
 }
+
 class HomePageLevel extends StatefulWidget{
   @override
   _homePageLevelState  createState() => new _homePageLevelState();
@@ -795,6 +540,7 @@ class _homePageLevelState extends State<HomePageLevel> {
     });
 
     String newlatlon;
+    city = settings.GetLocation();
     newlatlon = coordinateTable.coordinatesMap[city];
 
     final weatherResponse = await http.get(
@@ -883,8 +629,6 @@ void SetCoverDataBase(bool position) {
   }
 }
 
-
-
 class CoverSwitch extends StatelessWidget{
   //Function callback;
   bool value;
@@ -910,8 +654,6 @@ class CoverSwitch extends StatelessWidget{
     );
   }
 }
-
-
 
 class WeatherPage extends StatefulWidget {
   WeatherPage({Key key, this.title}) : super(key: key);
@@ -1170,21 +912,21 @@ class CoordinateTable {
 
   factory CoordinateTable.initTable() {
     Map map = new Map();
-    map['haifa'] = 'lat=32.794044&lon=34.989571';
-    map['tel aviv'] = 'lat=32.083333&lon=34.7999968';
-    map['jerusalem'] = 'lat=31.76904&lon=35.21633';
-    map['ariel'] = 'lat=32.1065&lon=35.18449';
-    map['netanya'] = 'lat=32.33291&lon=34.85992';
-    map['eilat'] = 'lat=29.55805&lon=34.94821';
-    map['beersheba'] = 'lat=31.2589&lon=34.7978';
-    map['nazareth'] = 'lat=32.7021&lon=35.2978';
-    map['rishon leẔiyyon'] = 'lat=31.95&lon=34.81';
-    map['ashqelon'] = 'lat=31.6658&lon=34.5664';
-    map['nahariyya'] = 'lat=33.0036&lon=35.0925';
-    map['herzelia'] = 'lat=32.184448&lon=34.870766';
-    map['qiryat shemona'] = 'lat=33.2075&lon=35.5697';
+    map['Haifa'] = 'lat=32.794044&lon=34.989571';
+    map['Tel Aviv'] = 'lat=32.083333&lon=34.7999968';
+    map['Jerusalem'] = 'lat=31.76904&lon=35.21633';
+    map['Ariel'] = 'lat=32.1065&lon=35.18449';
+    map['Netanya'] = 'lat=32.33291&lon=34.85992';
+    map['Eilat'] = 'lat=29.55805&lon=34.94821';
+    map['Beersheba'] = 'lat=31.2589&lon=34.7978';
+    map['Nazareth'] = 'lat=32.7021&lon=35.2978';
+    map['Rishon LeẔiyyon'] = 'lat=31.95&lon=34.81';
+    map['Ashqelon'] = 'lat=31.6658&lon=34.5664';
+    map['Nahariyya'] = 'lat=33.0036&lon=35.0925';
+    map['Herzelia'] = 'lat=32.184448&lon=34.870766';
+    map['Qiryat Shemona'] = 'lat=33.2075&lon=35.5697';
     map['qatsrin'] = 'lat=32.9925&lon=35.6906';
-    map['efrat'] = 'lat=31.653589&lon=35.149934';
+    map['Efrat'] = 'lat=31.653589&lon=35.149934';
 
     return CoordinateTable(
       coordinatesMap: map,
@@ -1471,11 +1213,7 @@ void handleMessage(String field) {
     }
 }
 
-
 void handleMessageOnMessageOpenedApp(String field) {}
-
-
-
 
 class MyLineItemPage extends StatefulWidget {
   MyLineItemPage({Key key, this.title}) : super(key: key);
@@ -1611,7 +1349,9 @@ String ShowSunLightStatus() {
 void CheckClock() async{
   DateTime _myTime;
   _myTime = await NTP.now();
-  if ((_myTime.hour == 20) && (nightNotificationFlag)){
+  int hour = _myTime.hour;
+
+  if ((hour == 20) && (nightNotificationFlag)){
     final databaseReference = FirebaseDatabase.instance.reference();
     firebaseData.SetData('Night note', nightNotificationVal);
     databaseReference.child('Night note').update({'Status': nightNotificationVal});
@@ -1619,12 +1359,13 @@ void CheckClock() async{
     nightNotificationFlag = false;
   }
   else{
-    if ((_myTime.hour != 20))
+    if ((hour != 20))
       nightNotificationFlag = true;
   }
 
-
-  if ((_myTime.hour == 8) && (nightNotificationFlag)){
+  int allertflag = firebaseData.GetData("Good day Allert");
+//  if ((_myTime.hour == 19) && (morningNotificationFlag) && (allertflag == 1)){ //real app
+  if ((hour == 19) && (morningNotificationFlag) && (allertflag == 1)){   // for brodcast
     String recomendation = GetRecomendaition();
     if ((recomendation == "Ideal time to hang laundry") || (recomendation == "Good time to hang laundry")) {
       final databaseReference = FirebaseDatabase.instance.reference();
@@ -1636,7 +1377,7 @@ void CheckClock() async{
     }
   }
   else{
-    if ((_myTime.hour != 8))
+    if ((hour != 19))
       morningNotificationFlag = true;
   }
 }
@@ -1646,7 +1387,7 @@ void CheckForcast(){
   final databaseReference = FirebaseDatabase.instance.reference();
 //  if ((weatherDataHome.main == "Rain") && (rainNotificationFlag)     //
 //      && (clothesStatus == 1)) {                                    // real App
-  if ((weatherDataHome.main == "Rain") && (clothesStatus == 1)) {     // for brodcast
+  if ((weatherDataHome.main == "Clear") && (clothesStatus == 1)) {     // for brodcast
     firebaseData.SetData('Rain note', rainNotificationVal);
     databaseReference.child('Rain note').update({'Status': rainNotificationVal});
     rainNotificationFlag = false;
