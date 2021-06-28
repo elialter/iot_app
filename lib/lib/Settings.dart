@@ -7,8 +7,9 @@ class Settings {
   bool goodDayAllert;
   String basketAllert;
   int alreadySet;
+  int newGoodDay;
 
-  Settings({this.alreadySet, this.city, this.autoCover, this.goodDayAllert, this.basketAllert});
+  Settings({this.alreadySet, this.city, this.autoCover, this.goodDayAllert, this.basketAllert, this.newGoodDay});
 
   factory Settings.Defualt() {
     return Settings(
@@ -17,6 +18,7 @@ class Settings {
       city: 'haifa',
       goodDayAllert: false,
       basketAllert: 'No',
+      newGoodDay: 1,
     );
   }
 
@@ -31,7 +33,7 @@ class Settings {
 
   void SetCoverPolicy(String policy) {
     int answer = 0;
-    if (policy == "Yes") {
+    if (policy == "Ask me before covering") {
       this.autoCover = false;
       answer = 0;
     }
@@ -45,18 +47,18 @@ class Settings {
     });
   }
   void SetGoodDayAllert(String answer) {
-    int answer = 0;
+    int newAnswer = 0;
     if (answer == "Yes") {
       this.goodDayAllert = true;
-      answer = 1;
+      newAnswer = 1;
     }
     else{
       this.goodDayAllert = true;
-      answer = 0;
+      newAnswer = 0;
     }
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("Settings").update({
-      'Good day Allert': answer
+      'Good day Allert': newAnswer
     });
   }
   bool GetGoodDayAllert(){
@@ -72,6 +74,14 @@ class Settings {
     databaseReference.child("Settings/City").once().then((DataSnapshot data) {
       this.city = data.value.toString();
     });
+  }
+
+  int GoodDayAllert(){
+    final databaseReference = FirebaseDatabase.instance.reference();
+    databaseReference.child("Settings/Good day Allert").once().then((DataSnapshot data) {
+      this.newGoodDay = data.value;
+    });
+    return this.newGoodDay;
   }
 
   bool GetCoverPolicy(){

@@ -152,6 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Firebase.initializeApp();
 
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Smart Line',
@@ -1041,7 +1042,7 @@ class _MySettingsState extends State<MySettings> {
                 onChanged: (String value) {
                   setState(() {
                     _chosenGoodDay = value;
-                    settings.SetGoodDayAllert(_chosenPolicy);
+                    settings.SetGoodDayAllert(value);
                   });
                 },
               ),
@@ -1077,7 +1078,7 @@ class _MySettingsState extends State<MySettings> {
                 onChanged: (String value) {
                   setState(() {
                     _chosenPolicy = value;
-                    settings.SetCoverPolicy(_chosenPolicy);
+                    settings.SetCoverPolicy(value);
                   });
                 },
               ),
@@ -1347,11 +1348,13 @@ String ShowSunLightStatus() {
 }
 
 void CheckClock() async{
-  DateTime _myTime;
-  _myTime = await NTP.now();
-  int hour = _myTime.hour;
+  var hour = DateTime.now();
+//  DateTime _myTime;
+//  _myTime = await NTP.now();
+//  int hour = _myTime.hour;
 
-  if ((hour == 20) && (nightNotificationFlag)){
+//  if ((hour.hour == 20) && (nightNotificationFlag)){ // real App
+  if (hour.hour == 20){   // brodcast version
     final databaseReference = FirebaseDatabase.instance.reference();
     firebaseData.SetData('Night note', nightNotificationVal);
     databaseReference.child('Night note').update({'Status': nightNotificationVal});
@@ -1359,15 +1362,16 @@ void CheckClock() async{
     nightNotificationFlag = false;
   }
   else{
-    if ((hour != 20))
+    if ((hour.hour != 20))
       nightNotificationFlag = true;
   }
-
-  int allertflag = firebaseData.GetData("Good day Allert");
-//  if ((_myTime.hour == 19) && (morningNotificationFlag) && (allertflag == 1)){ //real app
-  if ((hour == 19) && (morningNotificationFlag) && (allertflag == 1)){   // for brodcast
+  int allertflag = settings.GoodDayAllert();
+//settings.GetGoodDayAllert();
+//  if ((_myTime.hour == 19) && (morningNotificationFlag) && (allertflag == 1))){ //real app
+  if ((hour.hour == 8) && (allertflag == 1)){   // for brodcast
     String recomendation = GetRecomendaition();
     if ((recomendation == "Ideal time to hang laundry") || (recomendation == "Good time to hang laundry")) {
+      log("Writing to morning not");
       final databaseReference = FirebaseDatabase.instance.reference();
       firebaseData.SetData('Morning note', morningNotificationVal);
       databaseReference.child('Morning note').update(
@@ -1377,7 +1381,7 @@ void CheckClock() async{
     }
   }
   else{
-    if ((hour != 19))
+//    if ((hour.hour != 8))           //real App
       morningNotificationFlag = true;
   }
 }
@@ -1416,9 +1420,9 @@ void CheckSunLight(){
 }
 
 void CheckPosibleNotes(){
-  CheckClock();
   CheckForcast();
   CheckSunLight();
+  CheckClock();
 }
 
 class ContactUsItemPage extends StatefulWidget {
@@ -1534,3 +1538,4 @@ class _ContactUsItemPage extends State<ContactUsItemPage> {
     return "";
   }
 }
+
