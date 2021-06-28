@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 ///------------------------------------------------------------------------------------------------------
 import 'package:flutter/material.dart';
-import 'package:lite_rolling_switch/lite_rolling_switch.dart';
+//import 'package:lite_rolling_switch/lite_rolling_switch.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:ntp/ntp.dart';
@@ -23,6 +23,9 @@ import 'package:flutter_app2/models/WeatherDescriptionList.dart';
 import 'package:flutter_app2/models/FirebaseData.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'models/Controller.dart';
+import 'models/LiteSwitch.dart';
 
 const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
 String MyToken;
@@ -144,6 +147,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 //  class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    Firebase.initializeApp();
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Line',
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+      ),
+      home: HomePageLevel(),
+    );
+  }
+/*
   @override
   bool isLoading = false;
   CoordinateTable coordinateTable = new CoordinateTable.initTable();
@@ -399,6 +416,409 @@ class _MyHomePageState extends State<MyHomePage> {
       isLoading = false;
     });
   }
+*/
+}
+class HomePageLevel extends StatefulWidget{
+  @override
+  _homePageLevelState  createState() => new _homePageLevelState();
+}
+
+class _homePageLevelState extends State<HomePageLevel> {
+  @override
+  bool isLoading = false;
+  bool CoverState = false;
+  CoordinateTable coordinateTable = new CoordinateTable.initTable();
+  String city = settings.GetLocation();
+  CoverController controller;
+  Widget liteSwitch;
+
+  void handleMessageOnMessage(String field, BuildContext context) {
+    switch (field) {
+      case "Rain":
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                title: Text(
+                  field + " Allert",
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                    "Your clothes are getting wet! would you like to close the cover?",
+                    textAlign: TextAlign.center),
+                actions: [
+                  TextButton(
+
+                    child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      SetCoverState(true);
+                    },
+                  ),
+                ],
+              );
+            });
+        break;
+      case "Rain note":
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                title: Text(
+                  field + " Allert",
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                    "According to the weather forcast it will be rainy soon, you should take your clothes off  the line.",
+                    textAlign: TextAlign.center),
+                actions: [
+                  TextButton(
+                      child: Text("  ok  ", style: TextStyle(color: Colors.black),),
+                        onPressed: () {
+                        Navigator.of(context).pop();
+                       },
+                   ),
+                ]
+              );
+            });
+        break;
+      case "Night note":
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                title: Text(
+                  field + " Allert",
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                    "Night is coming. You may want to cover your laundry from dew, would you like to close the cover?",
+                    textAlign: TextAlign.center),
+                actions: [
+                  TextButton(
+
+                    child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      SetCoverState(true);
+                    },
+                  ),
+                ],
+              );
+            });
+        break;
+      case "Sun light note":
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                title: Text(
+                  field + " Allert",
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                    "The sun light intensity on the line is high, you may want to hang your laundry",
+                    textAlign: TextAlign.center),
+                  actions: [
+                    TextButton(
+                      child: Text("  ok  ", style: TextStyle( color: Colors.black),),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ]
+              );
+            });
+        break;
+      case "Morning note":
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                title: Text(
+                  field + " Allert",
+                  textAlign: TextAlign.center,
+                ),
+                content: Text(
+                    "Good morning! it supposed to be a good day to hang laundry",
+                    textAlign: TextAlign.center),
+                  actions: [
+                    TextButton(
+                      child: Text("  ok  ", style: TextStyle( color: Colors.black),),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ]
+              );
+            });
+        break;
+      case "Check status":
+        CheckPosibleNotes();
+        break;
+    }
+  }
+
+  void initState() {
+    //updateToken();
+    coverSwitch = CoverSwitch(false,controller);
+    liteSwitch = coverSwitch;
+    messageHandler(context);
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      print("here1: ${event.notification?.body}");
+      handleMessageOnMessage(event.data["body"], context);
+     });
+    controller =CoverController();
+    loadWeather();
+    }
+
+
+  void SetCoverState(bool state) {
+    setState(() {
+      CoverState = state;
+    });
+    controller.changeSwitch(state);
+  }
+
+  Widget build(BuildContext context) {
+    Firebase.initializeApp();
+    final databaseReference = FirebaseDatabase.instance.reference();
+
+    return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: Text('            Smart Line'),
+            actions: [
+              Icon(Icons.favorite),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                //child: Icon(Icons.search),
+              ),
+              Icon(Icons.more_vert),
+            ],
+          ),
+          body: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.asset(ShowBasketStatus()),
+                                  // Image.network(
+                                  //'https://image.flaticon.com/icons/png/512/2230/2230786.png'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Refresh',
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MyBasketItemPage()));
+                                  },
+                                  color: Colors.white,
+                                ),
+                              )
+                            ])),
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.asset('Assets/line.PNG'),
+                                  //Image.network(
+                                  //'https://previews.123rf.com/images/amin268/amin2681811/amin268181100729/127364943-drying-thin-line-icon-laundry-and-dry-clothes-sign-vector-graphics-a-linear-pattern-on-a-white-backg.jpg'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Refresh',
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) => MyLineItemPage()));
+                                  },
+                                  color: Colors.white,
+                                ),
+                              )
+                            ])),
+                    Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
+                                  icon: Image.network(
+                                      'https://images-na.ssl-images-amazon.com/images/I/61ql%2BQimu-L.png'),
+                                  iconSize: 70.0,
+                                  tooltip: 'Weather Forecast',
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => WeatherPage()));
+                                  },
+                                  color: Colors.white,
+                                ),
+                              )
+                            ])),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: weatherDataHome != null
+                          ? Weather(weather: weatherDataHome)
+                          : Container(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: isLoading
+                          ? CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        valueColor:
+                        new AlwaysStoppedAnimation(Colors.purple),
+                      )
+                          : IconButton(
+                        icon: new Icon(Icons.refresh),
+                        tooltip: 'Refresh',
+                        onPressed: loadWeather,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                Center(
+                  child: Text(
+                    GetRecomendaition(),
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                  heightFactor: 5,
+                ),
+              ]),
+          drawer: Drawer(
+            // Add a ListView to the drawer. This ensures the user can scroll
+            // through the options in the drawer if there isn't enough vertical
+            // space to fit everything.
+            child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  child: Text('Menu'),
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    Navigator.push(context,MaterialPageRoute(
+                        builder: (context) => MySettings()));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.delete_outline),
+                  title: Text('Washing basket'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyBasketItemPage()));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.schedule),
+                  title: Text('Schedule cover'),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.wb_sunny),
+                  title: Text('Weather'),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => WeatherPage()));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.message),
+                  title: Text('Contact us'),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ContactUsItemPage()));
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          floatingActionButton: CoverSwitch(CoverState, controller),
+          // This trailing comma makes auto-formatting nicer for build methods.// This trailing comma makes auto-formatting nicer for build methods.
+        );
+  }
+
+  loadWeather() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    String newlatlon;
+    newlatlon = coordinateTable.coordinatesMap[city];
+
+    final weatherResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
+    final forecastResponse = await http.get(
+        'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
+            newlatlon);
+
+    if (weatherResponse.statusCode == 200 &&
+        forecastResponse.statusCode == 200) {
+      return setState(() {
+        var json = jsonDecode(weatherResponse.body);
+        weatherListHome = new WeatherDescriptionList.fromJson(json);
+        weatherDataHome = new WeatherData.fromJson(json['list'][0], json['city']['name']);
+
+        isLoading = false;
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
 }
 
@@ -465,70 +885,19 @@ void SetCoverDataBase(bool position) {
 
 
 
-class CoverSwitch extends StatefulWidget{
-  Function callback;
-  bool flag;
-
-  CoverSwitch(this.callback , this.flag);
-
-
-  void SetState(bool state) {
-    final databaseReference = FirebaseDatabase.instance.reference();
-    if (state) {
-      databaseReference.child('Cover').update({'Status': 1});
-    } else {
-      databaseReference.child('Cover').update({'Status': 0});
-    }
-    //liteRollingSwitch.onChanged(state);
-    //liteRollingSwitch.createState();
-    //coverSwitch.SetState(true);
-  //_MyHomePageState().SetCover(state);
-  callback(new _coverSwitchState().NewSwitch(state));
-  }
-/*
-  LiteRollingSwitch liteRollingSwitch = LiteRollingSwitch(
-  // tooltip: 'Cover the laundry',
-  value: false,
-  textOn: "Covered",
-  textOff: " Uncovered",
-  textSize: 13.0,
-  colorOn: Colors.lightGreen,
-  colorOff: Colors.redAccent,
-  iconOn: Icons.power_settings_new,
-  iconOff: Icons.power_settings_new,
-  onChanged: (bool position) => SetCover(position),
-  );
-
- */
-
-
-  @override
-  _coverSwitchState createState() => new _coverSwitchState();
-
-}
-
-class _coverSwitchState extends State<CoverSwitch> {
+class CoverSwitch extends StatelessWidget{
+  //Function callback;
+  bool value;
+  CoverController controller;
+  CoverSwitch(this.value, this.controller);
 
   @override
   Widget build(BuildContext context) {
-    return LiteRollingSwitch(
-      // tooltip: 'Cover the laundry',
-      value: true,
-      textOn: "Covered",
-      textOff: " Uncovered",
-      textSize: 13.0,
-      colorOn: Colors.lightGreen,
-      colorOff: Colors.redAccent,
-      iconOn: Icons.power_settings_new,
-      iconOff: Icons.power_settings_new,
-      onChanged: (bool position) => SetCoverDataBase(position),
-    );
-  }
 
-  Widget NewSwitch(bool state) {
-    return LiteRollingSwitch(
+    log("bulding CoverState with $value");
+    return new LiteRollingSwitch(
       // tooltip: 'Cover the laundry',
-      value: state,
+      value: value,
       textOn: "Covered",
       textOff: " Uncovered",
       textSize: 13.0,
@@ -537,6 +906,7 @@ class _coverSwitchState extends State<CoverSwitch> {
       iconOn: Icons.power_settings_new,
       iconOff: Icons.power_settings_new,
       onChanged: (bool position) => SetCoverDataBase(position),
+      controller: controller,
     );
   }
 }
@@ -1070,32 +1440,7 @@ void messageHandler(BuildContext context) {
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage event) {
     print(event.notification?.body);
-    handleMessageOnMessage(event.data["body"], context);
-    /*
-    handleMessage(event.data["body"]);
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-              event.notification?.title,
-              textAlign: TextAlign.center,
-            ),
-            content: Text("${event.notification?.body}",
-                textAlign: TextAlign.center),
-            //.substring(0,seperateCharIndex)} and status is ${event.notification?.body.substring(seperateCharIndex)}"),
-            actions: [
-              TextButton(
-                child: Text("Ok"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
-
-     */
+    //handleMessageOnMessage(event.data["body"], context);
   });
   FirebaseMessaging.onMessageOpenedApp.listen((message) {
     handleMessage(message.data["body"]); //need?
@@ -1129,125 +1474,7 @@ void handleMessage(String field) {
 
 void handleMessageOnMessageOpenedApp(String field) {}
 
-void handleMessageOnMessage(String field, BuildContext context) {
-  switch (field) {
-    case "Rain":
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            //if cover is open and there are clothes on the line - check database
-            return AlertDialog(
-              title: Text(
-                field + " Allert",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                  "Your clothes are getting wet! would you like to close the cover?",
-                  textAlign: TextAlign.center),
-              actions: [
-                TextButton(
 
-                  child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    coverSwitch.SetState(true);
-                  },
-                ),
-              ],
-            );
-          });
-      break;
-    case "Rain note":
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            //if cover is open and there are clothes on the line - check database
-            return AlertDialog(
-              title: Text(
-                field + " Allert",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                  "According to the weather forcast it will be rainy soon, you should take your clothes off  the line.",
-                  textAlign: TextAlign.center),
-            );
-          });
-      break;
-    case "Night note":
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            //if cover is open and there are clothes on the line - check database
-            return AlertDialog(
-              title: Text(
-                field + " Allert",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                  "Night is coming. You may want to cover your laundry from dew, would you like to close the cover?",
-                  textAlign: TextAlign.center),
-              actions: [
-                TextButton(
-
-                  child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    coverSwitch.SetState(true);
-                  },
-                ),
-              ],
-            );
-          });
-      break;
-    case "Sun light note":
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            //if cover is open and there are clothes on the line - check database
-            return AlertDialog(
-              title: Text(
-                field + " Allert",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                  "The sun light intensity on the line is high, you may want to hang your laundry",
-                  textAlign: TextAlign.center),
-            );
-          });
-      break;
-    case "Morning note":
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            //if cover is open and there are clothes on the line - check database
-            return AlertDialog(
-              title: Text(
-                field + " Allert",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                  "Good morning! it supposed to be a good day to hang laundry",
-                  textAlign: TextAlign.center),
-            );
-          });
-      break;
-    case "Check status":
-        CheckPosibleNotes();
-      break;
-  }
-}
 
 
 class MyLineItemPage extends StatefulWidget {
@@ -1417,8 +1644,9 @@ void CheckClock() async{
 void CheckForcast(){
   int clothesStatus = firebaseData.GetData("Clothes on line");
   final databaseReference = FirebaseDatabase.instance.reference();
-  if ((weatherDataHome.main == "Rain") && (rainNotificationFlag)
-      && (clothesStatus == 1)) {
+//  if ((weatherDataHome.main == "Rain") && (rainNotificationFlag)     //
+//      && (clothesStatus == 1)) {                                    // real App
+  if ((weatherDataHome.main == "Rain") && (clothesStatus == 1)) {     // for brodcast
     firebaseData.SetData('Rain note', rainNotificationVal);
     databaseReference.child('Rain note').update({'Status': rainNotificationVal});
     rainNotificationFlag = false;
@@ -1433,7 +1661,8 @@ void CheckForcast(){
 void CheckSunLight(){
   int sunlightStatus = firebaseData.GetData("Sun Light");
   final databaseReference = FirebaseDatabase.instance.reference();
-  if ((sunlightStatus >= 3) && (sunLightNotificationFlag)) {
+  //if ((sunlightStatus >= 3) && (sunLightNotificationFlag)) { // real App line
+  if (sunlightStatus >= 3){ // line for brodcast
     firebaseData.SetData('Sun light note', sunLightNotificationVal);
     databaseReference.child('Sun light note').update({'Status': sunLightNotificationVal});
     sunLightNotificationFlag = false;
@@ -1517,7 +1746,7 @@ class _ContactUsItemPage extends State<ContactUsItemPage> {
                         height: 115.0),
                     Text(
                       "     Barel Cohen Adiv\n"
-                          "     Electric controllers\n"
+                          "    Electronic controllers\n"
                           "       and mechanism\n"
                           "       barel2x@gmail.com ",
                       style: TextStyle(fontSize: 20),
