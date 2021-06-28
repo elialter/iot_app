@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:ntp/ntp.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,16 @@ void main() async {
 
 Settings settings;
 FirebaseData firebaseData;
+bool rainNotificationFlag = true;
+int rainNotificationVal = 1;
+bool nightNotificationFlag = true;
+int nightNotificationVal = 1;
+WeatherDescriptionList weatherListHome;
+WeatherData weatherDataHome; //=WeatherData();
+bool sunLightNotificationFlag = true;
+int sunLightNotificationVal = 1;
+bool morningNotificationFlag = true;
+int morningNotificationVal = 1;
 
 class MyApp extends StatelessWidget {
   @override
@@ -53,6 +64,8 @@ class MyApp extends StatelessWidget {
           new WeatherPage(title: "WeatherPage"),
       MySettings.routeName: (BuildContext context) =>
           new MySettings(title: "MySettings"),
+      ContactUsItemPage.routeName: (BuildContext context) =>
+      new MySettings(title: "ContactUsItemPage"),
     };
 
     messageHandler(context);
@@ -140,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initState() {
     //updateToken();
-    coverSwitch = CoverSwitch(this.callback);
+    coverSwitch = CoverSwitch(this.callback, false);
     liteSwitch = coverSwitch;
     messageHandler(context);
     loadWeather();
@@ -152,11 +165,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
-  WeatherDescriptionList weatherList;
-  WeatherData weatherData; //=WeatherData();
-
-  @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     final databaseReference = FirebaseDatabase.instance.reference();
@@ -264,8 +272,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: weatherData != null
-                          ? Weather(weather: weatherData)
+                      child: weatherDataHome != null
+                          ? Weather(weather: weatherDataHome)
                           : Container(),
                     ),
                     Padding(
@@ -348,10 +356,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.message),
                   title: Text('Contact us'),
                   onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ContactUsItemPage()));
                   },
                 ),
               ],
@@ -371,8 +377,6 @@ class _MyHomePageState extends State<MyHomePage> {
     String newlatlon;
     newlatlon = coordinateTable.coordinatesMap[city];
 
-//    final lat = 32.794044;
-//    final lon = 34.989571;
     final weatherResponse = await http.get(
         'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
             newlatlon);
@@ -380,15 +384,13 @@ class _MyHomePageState extends State<MyHomePage> {
         'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&' +
             newlatlon);
 
-    //    'https://api.openweathermap.org/data/2.5/forecast?APPID=3b223fbe211147629d3f1c189bb6ca6f&lat=32.794044&lon=34.989571'
-
     if (weatherResponse.statusCode == 200 &&
         forecastResponse.statusCode == 200) {
       return setState(() {
         var json = jsonDecode(weatherResponse.body);
-        weatherList = new WeatherDescriptionList.fromJson(json);
-        weatherData =
-            new WeatherData.fromJson(json['list'][0], json['city']['name']);
+        weatherListHome = new WeatherDescriptionList.fromJson(json);
+        weatherDataHome = new WeatherData.fromJson(json['list'][0], json['city']['name']);
+
         isLoading = false;
       });
     }
@@ -398,35 +400,65 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  String GetRecomendaition() {
-    var clear = 0;
-    var cloud = 0;
-
-//    while(weatherList == null)
-
-    for (var i = 0; i < 10; i++) {
-      if (weatherList == null) {
-        return "";
-      }
-      if (weatherList.list[i] == "Rain")
-        return "Not a good time to hang laundry";
-      if (weatherList.list[i] == "Cloud") cloud++;
-      if (weatherList.list[i] == "Clear") clear++;
-    }
-    if (clear == 10) return "Ideal time to hang laundry";
-    if (clear >= 8) return "Good time to hang laundry";
-    if (clear >= 6) return "Ok time to hang laundry";
-
-    return "Not rainy, but not a good time to hang laundry";
-  }
 }
 
+String GetRecomendaition() {
+  int sunlightStatus = firebaseData.GetData("Sun Light");
+  var clear = 0;
+  var cloud = 0;
+
+  for (var i = 0; i < 10; i++) {
+    if (weatherListHome == null) {
+      return "";
+    }
+    if (weatherListHome.list[i] == "Rain")
+      return "Not a good time to hang laundry";
+    if (weatherListHome.list[i] == "Cloud") cloud++;
+    if (weatherListHome.list[i] == "Clear") clear++;
+  }
+  clear = clear + sunlightStatus - 2;
+  if (clear >= 10) return "Ideal time to hang laundry";
+  if (clear >= 8) return "Good time to hang laundry";
+  if (clear >= 6) return "Ok time to hang laundry";
+
+  return "Not rainy, but not a good time to hang laundry";
+}
+
+void  ChangeNightNoteVal(){
+  if (nightNotificationVal == 0)
+    nightNotificationVal = 1;
+  else
+    nightNotificationVal = 0;
+}
+
+void  ChangeMorningNoteVal(){
+  if (morningNotificationVal == 0)
+    morningNotificationVal = 1;
+  else
+    morningNotificationVal = 0;
+}
+
+void  ChangeRainNoteVal(){
+  if (rainNotificationVal == 0)
+    rainNotificationVal = 1;
+  else
+    rainNotificationVal = 0;
+}
+
+void  ChangeSunLightNoteVal(){
+  if (sunLightNotificationVal == 0)
+    sunLightNotificationVal = 1;
+  else
+    sunLightNotificationVal = 0;
+}
 
 void SetCoverDataBase(bool position) {
   final databaseReference = FirebaseDatabase.instance.reference();
   if (position) {
+    firebaseData.SetData('Cover', 1);
     databaseReference.child('Cover').update({'Status': 1});
   } else {
+    firebaseData.SetData('Cover', 0);
     databaseReference.child('Cover').update({'Status': 0});
   }
 }
@@ -435,8 +467,10 @@ void SetCoverDataBase(bool position) {
 
 class CoverSwitch extends StatefulWidget{
   Function callback;
+  bool flag;
 
-  CoverSwitch(this.callback);
+  CoverSwitch(this.callback , this.flag);
+
 
   void SetState(bool state) {
     final databaseReference = FirebaseDatabase.instance.reference();
@@ -479,7 +513,7 @@ class _coverSwitchState extends State<CoverSwitch> {
   Widget build(BuildContext context) {
     return LiteRollingSwitch(
       // tooltip: 'Cover the laundry',
-      value: false,
+      value: true,
       textOn: "Covered",
       textOff: " Uncovered",
       textSize: 13.0,
@@ -1077,15 +1111,21 @@ Future<void> _messageHandler(RemoteMessage message) async {
 }
 
 void handleMessage(String field) {
-  print("handleMessage was called");
-  final databaseReference = FirebaseDatabase.instance.reference();
-  databaseReference.child("$field/Status").once().then((DataSnapshot data) {
-    print("$field/Status");
-    print(data.value);
-    int value = int.parse(data.value);
-    firebaseData.SetData(field, data.value);
-  });
+  if (field == "Check status"){
+      CheckPosibleNotes();
+    }
+    else {
+      print("handleMessage was called");
+      final databaseReference = FirebaseDatabase.instance.reference();
+      databaseReference.child("$field/Status").once().then((DataSnapshot data) {
+        print("$field/Status");
+        print(data.value);
+        int value = int.parse(data.value);
+        firebaseData.SetData(field, data.value);
+      });
+    }
 }
+
 
 void handleMessageOnMessageOpenedApp(String field) {}
 
@@ -1123,6 +1163,89 @@ void handleMessageOnMessage(String field, BuildContext context) {
             );
           });
       break;
+    case "Rain note":
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            //if cover is open and there are clothes on the line - check database
+            return AlertDialog(
+              title: Text(
+                field + " Allert",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                  "According to the weather forcast it will be rainy soon, you should take your clothes off  the line.",
+                  textAlign: TextAlign.center),
+            );
+          });
+      break;
+    case "Night note":
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            //if cover is open and there are clothes on the line - check database
+            return AlertDialog(
+              title: Text(
+                field + " Allert",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                  "Night is coming. You may want to cover your laundry from dew, would you like to close the cover?",
+                  textAlign: TextAlign.center),
+              actions: [
+                TextButton(
+
+                  child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    coverSwitch.SetState(true);
+                  },
+                ),
+              ],
+            );
+          });
+      break;
+    case "Sun light note":
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            //if cover is open and there are clothes on the line - check database
+            return AlertDialog(
+              title: Text(
+                field + " Allert",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                  "The sun light intensity on the line is high, you may want to hang your laundry",
+                  textAlign: TextAlign.center),
+            );
+          });
+      break;
+    case "Morning note":
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            //if cover is open and there are clothes on the line - check database
+            return AlertDialog(
+              title: Text(
+                field + " Allert",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                  "Good morning! it supposed to be a good day to hang laundry",
+                  textAlign: TextAlign.center),
+            );
+          });
+      break;
+    case "Check status":
+        CheckPosibleNotes();
+      break;
   }
 }
 
@@ -1149,17 +1272,34 @@ class _MyLineItemPage extends State<MyLineItemPage> {
         backgroundColor: Colors.teal,
       ),
       body: new Container(
-        child: new Column(children: <Widget>[
-          Column(
-            children: [
-              Image.asset(ShowLineStatus()),
-              Text(
+        child: new Column(
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Image.asset(ShowLineStatus()),
+                  Text(
                 GetLineStatus(),
                 style: TextStyle(fontSize: 25),
                 textAlign: TextAlign.center,
               ),
-              Image.asset(ShowSunLightStatus()),
-              Text(
+                  Text(
+                    "",
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),// empty row
+                  Text(
+                    "",
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),// empty row
+                  Text(
+                    "",
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),// empty row
+                  Image.asset(ShowSunLightStatus()),
+                  Text(
                 GetSunLightStatus(),
                 style: TextStyle(fontSize: 25),
                 textAlign: TextAlign.center,
@@ -1210,33 +1350,217 @@ String ShowLineStatus() {
   int clothesStatus = firebaseData.GetData("Clothes on line");
 
   if (clothesStatus == 0) {
-    return "images/barels graphics.png";
+    return 'Assets/line.PNG';
   }
   if (clothesStatus == 1) {
     return 'Assets/line.PNG';
   }
-
-  return "images/barels graphics.png";
+  return 'Assets/line.PNG';
 }
 
 String ShowSunLightStatus() {
   int sunLightStatus = firebaseData.GetData("Sun Light");
 
   if (sunLightStatus == 1) {
-    return 'Assets/waiting.png';
+    return "images/sun intensity 1.jpeg";
   }
   if (sunLightStatus == 2) {
-    return "images/waiting.png";
+    return "images/sun intensity 2.jpeg";
   }
   if (sunLightStatus == 3) {
-    return 'Assets/waiting.PNG';
+    return "images/sun intensity 3.jpeg";
   }
   if (sunLightStatus == 4) {
-    return "images/waiting.png";
+    return "images/sun intensity 4.jpeg";
   }
   if (sunLightStatus == 5) {
-    return 'Assets/waiting.PNG';
+    return "images/sun intensity 5.jpeg";
   }
 
-  return "images/waiting.png";
+
+  return "images/sun intensity 1.jpeg";
+}
+
+void CheckClock() async{
+  DateTime _myTime;
+  _myTime = await NTP.now();
+  if ((_myTime.hour == 20) && (nightNotificationFlag)){
+    final databaseReference = FirebaseDatabase.instance.reference();
+    firebaseData.SetData('Night note', nightNotificationVal);
+    databaseReference.child('Night note').update({'Status': nightNotificationVal});
+    ChangeNightNoteVal();
+    nightNotificationFlag = false;
+  }
+  else{
+    if ((_myTime.hour != 20))
+      nightNotificationFlag = true;
+  }
+
+
+  if ((_myTime.hour == 8) && (nightNotificationFlag)){
+    String recomendation = GetRecomendaition();
+    if ((recomendation == "Ideal time to hang laundry") || (recomendation == "Good time to hang laundry")) {
+      final databaseReference = FirebaseDatabase.instance.reference();
+      firebaseData.SetData('Morning note', morningNotificationVal);
+      databaseReference.child('Morning note').update(
+          {'Status': morningNotificationVal});
+      ChangeMorningNoteVal();
+      morningNotificationFlag = false;
+    }
+  }
+  else{
+    if ((_myTime.hour != 8))
+      morningNotificationFlag = true;
+  }
+}
+
+void CheckForcast(){
+  int clothesStatus = firebaseData.GetData("Clothes on line");
+  final databaseReference = FirebaseDatabase.instance.reference();
+  if ((weatherDataHome.main == "Rain") && (rainNotificationFlag)
+      && (clothesStatus == 1)) {
+    firebaseData.SetData('Rain note', rainNotificationVal);
+    databaseReference.child('Rain note').update({'Status': rainNotificationVal});
+    rainNotificationFlag = false;
+    ChangeRainNoteVal();
+  }
+  else{
+    if (weatherDataHome.main != "Rain")
+      rainNotificationFlag = true;
+  }
+}
+
+void CheckSunLight(){
+  int sunlightStatus = firebaseData.GetData("Sun Light");
+  final databaseReference = FirebaseDatabase.instance.reference();
+  if ((sunlightStatus >= 3) && (sunLightNotificationFlag)) {
+    firebaseData.SetData('Sun light note', sunLightNotificationVal);
+    databaseReference.child('Sun light note').update({'Status': sunLightNotificationVal});
+    sunLightNotificationFlag = false;
+    ChangeSunLightNoteVal();
+  }
+  else{
+    if (sunlightStatus < 3)
+      sunLightNotificationFlag = true;
+  }
+}
+
+void CheckPosibleNotes(){
+  CheckClock();
+  CheckForcast();
+  CheckSunLight();
+}
+
+class ContactUsItemPage extends StatefulWidget {
+  ContactUsItemPage({Key key, this.title}) : super(key: key);
+
+  static const String routeName = "/ContactUsItemPage";
+
+  final String title;
+
+  @override
+  _ContactUsItemPage createState() => new _ContactUsItemPage();
+}
+
+class _ContactUsItemPage extends State<ContactUsItemPage> {
+
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: AppBar(
+        title: Text('               Contact Us'),
+        backgroundColor: Colors.teal,
+      ),
+      body: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                           Image.asset("images/myProfile.png",
+                              width: 135.0,
+                              height: 115.0),
+                           Text(
+                             "Eli Alter\n"
+                               "main application developer\n"
+                                 " eliezerd.alter@gmail.com",
+                             style: TextStyle(fontSize: 20),
+                             textAlign: TextAlign.center,
+                           )
+                    ],
+         ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Image.asset("images/eliadProfile.jpg",
+                        width: 140.0,
+                        height: 125.0),
+                    Text(
+                      "    Eliad Ben Haim\n"
+                          "     Web server developer\n"
+                          "     and integration\n"
+                          "      Eliad.y.bh@gmail.com ",
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Image.asset("images/barelProfile.jpg",
+                        width: 135.0,
+                        height: 115.0),
+                    Text(
+                      "     Barel Cohen Adiv\n"
+                          "     Electric controllers\n"
+                          "       and mechanism\n"
+                          "       barel2x@gmail.com ",
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                ),
+       ],
+      ),
+    );
+  }
+
+  String GetLineStatus() {
+    int clothesStatus = firebaseData.GetData("Clothes on line");
+
+    if (clothesStatus == 0) {
+      return "You have no clothes on your Line";
+    }
+    if (clothesStatus == 1) {
+      return "You have clothes on your Line";
+    }
+    return "";
+  }
+
+  String GetSunLightStatus() {
+    int sunLightStatus = firebaseData.GetData("Sun Light");
+
+
+    if (sunLightStatus == 1) {
+      return "sun light intensity is 1 in 5";
+    }
+    if (sunLightStatus == 2) {
+      return "sun light intensity is 2 in 5";
+    }
+    if (sunLightStatus == 3) {
+      return "sun light intensity is 3 in 5";
+    }
+    if (sunLightStatus == 4) {
+      return "sun light intensity is 4 in 5";
+    }
+    if (sunLightStatus == 5) {
+      return "sun light intensity is 5 in 5";
+    }
+    return "";
+  }
 }
