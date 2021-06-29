@@ -181,36 +181,93 @@ class _homePageLevelState extends State<HomePageLevel> {
   void handleMessageOnMessage(String field, BuildContext context) {
     switch (field) {
       case "Rain":
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              //if cover is open and there are clothes on the line - check database
-              return AlertDialog(
-                title: Text(
-                  field + " Allert",
-                  textAlign: TextAlign.center,
-                ),
-                content: Text(
-                    "Your clothes are getting wet! would you like to close the cover?",
-                    textAlign: TextAlign.center),
-                actions: [
-                  TextButton(
+        int rain;
+        int covered ;
+        int clothesOnLine;
+        final databaseReference = FirebaseDatabase.instance.reference();
+          databaseReference.once().then((DataSnapshot data) {
+            rain = data.value["Rain"]["Status"];
+            covered = data.value["Cover"]["Status"];
+            clothesOnLine = data.value["Clothes on line"]["Status"];
+        if(rain == 1) {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
 
-                    child: Text("  No  ", style: TextStyle(backgroundColor: Colors.redAccent[100], color: Colors.black),),
+                Text msg;
+                TextButton firstButton;
+                TextButton secondButton;
+
+                if (covered == 0 && clothesOnLine == 1) {
+                  msg = Text(
+                      "Your clothes are getting wet! would you like to close the cover?",
+                      textAlign: TextAlign.center);
+                  firstButton = TextButton(child: Text("  No  ",
+                    style: TextStyle(backgroundColor: Colors.redAccent[100],
+                        color: Colors.black),),
                     onPressed: () {
                       Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text("  Yes  ", style: TextStyle(backgroundColor: Colors.lightGreen, color: Colors.black),),
+                    },);
+                  secondButton = TextButton(
+                    child: Text("  Yes  ", style: TextStyle(
+                        backgroundColor: Colors.lightGreen,
+                        color: Colors.black),),
                     onPressed: () {
                       Navigator.of(context).pop();
                       SetCoverState(true);
-                    },
+                    },);
+                }
+                else if (covered == 1 && clothesOnLine == 1) {
+                  msg = Text(
+                      "It's Raining! but don't worry, your clothes are covered!",
+                      textAlign: TextAlign.center);
+                  firstButton = TextButton(
+                    child: Text(
+                      "     ", style: TextStyle(color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },);
+                  secondButton = TextButton(
+                    child: Text(
+                      "  Ok  ", style: TextStyle(color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },);
+                }
+                else if (clothesOnLine == 0) {
+                  msg = Text(
+                      "It's Raining! but don't worry, because you dont have any cloths on the line!",
+                      textAlign: TextAlign.center);
+                  firstButton = TextButton(
+                    child: Text(
+                      "     ", style: TextStyle(color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },);
+                  secondButton = TextButton(
+                    child: Text(
+                      "  Ok  ", style: TextStyle(color: Colors.black),),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },);
+                }
+
+
+                //if cover is open and there are clothes on the line - check database
+                return AlertDialog(
+                  title: Text(
+                    field + " Allert",
+                    textAlign: TextAlign.center,
                   ),
-                ],
-              );
-            });
+                  content: msg,
+                  actions: [
+                    firstButton,
+                    secondButton,
+                  ],
+                );
+              });
+        }
+          });
         break;
       case "Rain note":
         showDialog(
@@ -218,21 +275,22 @@ class _homePageLevelState extends State<HomePageLevel> {
             builder: (BuildContext context) {
               //if cover is open and there are clothes on the line - check database
               return AlertDialog(
-                title: Text(
-                  field + " Allert",
-                  textAlign: TextAlign.center,
-                ),
-                content: Text(
-                    "According to the weather forcast it will be rainy soon, you should take your clothes off  the line.",
-                    textAlign: TextAlign.center),
-                actions: [
-                  TextButton(
-                      child: Text("  ok  ", style: TextStyle(color: Colors.black),),
-                        onPressed: () {
+                  title: Text(
+                    field + " Allert",
+                    textAlign: TextAlign.center,
+                  ),
+                  content: Text(
+                      "According to the weather forcast it will be rainy soon, you should take your clothes off  the line.",
+                      textAlign: TextAlign.center),
+                  actions: [
+                    TextButton(
+                      child: Text(
+                        "  Ok  ", style: TextStyle(color: Colors.black),),
+                      onPressed: () {
                         Navigator.of(context).pop();
-                       },
-                   ),
-                ]
+                      },
+                    ),
+                  ]
               );
             });
         break;
@@ -283,7 +341,7 @@ class _homePageLevelState extends State<HomePageLevel> {
                     textAlign: TextAlign.center),
                   actions: [
                     TextButton(
-                      child: Text("  ok  ", style: TextStyle( color: Colors.black),),
+                      child: Text("  Ok  ", style: TextStyle( color: Colors.black),),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -307,7 +365,7 @@ class _homePageLevelState extends State<HomePageLevel> {
                     textAlign: TextAlign.center),
                   actions: [
                     TextButton(
-                      child: Text("  ok  ", style: TextStyle( color: Colors.black),),
+                      child: Text("  Ok  ", style: TextStyle( color: Colors.black),),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
