@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_app2/models/WeatherData.dart';
 import 'package:flutter_app2/main.dart';
+import 'dart:io';
 
 class FirebaseData {
   Map dataMap;
@@ -49,13 +50,24 @@ class FirebaseData {
        databaseReference.child("Users/$user/Settings/Already set").once().then((DataSnapshot data) {
          dataMap[newField] = data.value;
        });
+       sleep(Duration(seconds:1));
+       final databaseR = FirebaseDatabase.instance.reference();
+       databaseR.child("Users/$user/Settings/Already set").once().then((DataSnapshot data) {
+         dataMap[newField] = data.value;
+       });
     }
     else {
       newField = field;
       databaseReference.child("$field/Status").once().then((DataSnapshot data) {
         dataMap[newField] = data.value;
       });
+      sleep(Duration(seconds:1));
+      final databaseR = FirebaseDatabase.instance.reference();
+      databaseR.child("$field/Status").once().then((DataSnapshot data) {
+        dataMap[newField] = data.value;
+      });
     }
+
     return dataMap[newField];
   }
 

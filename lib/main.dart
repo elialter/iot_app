@@ -54,6 +54,8 @@ bool sunLightNotificationFlag = true;
 int sunLightNotificationVal = 1;
 bool morningNotificationFlag = true;
 int morningNotificationVal = 1;
+bool basketFlag = true;
+int basketVal = 0;
 
 class MyApp extends StatelessWidget {
   @override
@@ -677,6 +679,13 @@ void  ChangeSunLightNoteVal(){
     sunLightNotificationVal = 0;
 }
 
+void  ChangeBasketeVal(){
+  if (basketVal == 0)
+    basketVal = 1;
+  else
+    basketVal = 0;
+}
+
 void SetCoverDataBase(bool position) {
   final databaseReference = FirebaseDatabase.instance.reference();
   if (position) {
@@ -928,7 +937,12 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
   }
 
   String GetBasketStatus() {
-    int basketStatus = firebaseData.GetData("Laundry basket");
+    if (basketVal == 0){
+      ChangeBasketeVal();
+      GetBasketStatus();
+    }
+    ChangeBasketeVal();
+    basketStatus = firebaseData.GetData("Laundry basket");
 
     if (basketStatus == 0) {
       return "Your basket is empty";
@@ -942,13 +956,13 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
     if (basketStatus == 3) {
       return "Your basket is full";
     }
-    return "";
+
+    return "Your basket is empty";
   }
 }
 
 String ShowBasketStatus() {
   int basketStatus = firebaseData.GetData("Laundry basket");
-
   if (basketStatus == 0) {
     return "images/basket0.png";
   }
@@ -961,6 +975,7 @@ String ShowBasketStatus() {
   if (basketStatus == 3) {
     return "images/basket3.png";
   }
+
   return "images/basket0.png";
 }
 
@@ -1462,6 +1477,7 @@ void CheckForcast(){
 }
 
 void CheckSunLight(){
+  int clothesStatus = firebaseData.GetData("Clothes on line");
   int sunlightStatus = firebaseData.GetData("Sun Light");
   final databaseReference = FirebaseDatabase.instance.reference();
   //if ((sunlightStatus >= 3) && (sunLightNotificationFlag)) { // real App line
