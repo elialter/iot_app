@@ -50,7 +50,8 @@ int rainNotificationVal = 1;
 bool nightNotificationFlag = true;
 int nightNotificationVal = 1;
 WeatherDescriptionList weatherListHome;
-WeatherData weatherDataHome; //=WeatherData();
+//WeatherData weatherDataHome; //=WeatherData();
+WeatherData weatherDataHome = WeatherData();
 bool sunLightNotificationFlag = true;
 int sunLightNotificationVal = 1;
 bool morningNotificationFlag = true;
@@ -509,7 +510,9 @@ class _homePageLevelState extends State<HomePageLevel> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: weatherDataHome != null
+                      child: weatherDataHome != null && weatherDataHome.date!=null
+                          && weatherDataHome.name!=null  && weatherDataHome.icon!=null
+                          && weatherDataHome.main!=null && weatherDataHome.temp!=null
                           ? Weather(weather: weatherDataHome)
                           : Container(),
                     ),
@@ -1265,7 +1268,7 @@ void messageHandler(BuildContext context) {
 
 Future<void> _messageHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  //handleMessage(message.notification?.title); //need?
+  handleMessage(message.data["body"]); //need?
 }
 
 void handleMessage(String field) {
@@ -1492,8 +1495,9 @@ void CheckSunLight(){
 
 void CheckPosibleNotes(){
   CheckForcast();
-  CheckSunLight();
+  //CheckSunLight();
   CheckClock();
+  CheckSunLight();
 }
 
 class ContactUsItemPage extends StatefulWidget {

@@ -1,9 +1,18 @@
 class WeatherData {
+
   final DateTime date;
   final String name;
   final double temp;
   final String main;
   final String icon;
+   /*
+  DateTime date = DateTime(2021,8,8,18);
+  String name= "Haifa";
+  double temp = 26.26;
+  String main = "Clouds";
+  String icon="02n";
+
+    */
 
   WeatherData({this.date, this.name, this.temp, this.main, this.icon});
 
