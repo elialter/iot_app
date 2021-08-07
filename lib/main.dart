@@ -27,7 +27,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'models/Controller.dart';
 import 'models/LiteSwitch.dart';
 
-const String user = "Eliezer"; // "Eliad", "Eliezer" , "Barel"
+const String user = "Eliad"; // "Eliad", "Eliezer" , "Barel"
 String MyToken;
 _MyHomePageState HomePageState =_MyHomePageState();
 CoverSwitch coverSwitch;
@@ -43,7 +43,8 @@ void main() async {
 }
 
 Settings settings;
-FirebaseData firebaseData;
+//FirebaseData firebaseData;
+FirebaseData firebaseData= FirebaseData.Init();
 bool rainNotificationFlag = true;
 int rainNotificationVal = 1;
 bool nightNotificationFlag = true;
@@ -176,6 +177,7 @@ class _homePageLevelState extends State<HomePageLevel> {
   @override
   bool isLoading = false;
   bool CoverState = false;
+  int cover;
   CoordinateTable coordinateTable = new CoordinateTable.initTable();
   String city = settings.GetLocation();
   CoverController controller;
@@ -254,7 +256,6 @@ class _homePageLevelState extends State<HomePageLevel> {
                       Navigator.of(context).pop();
                     },);
                 }
-
 
                 //if cover is open and there are clothes on the line - check database
                 return AlertDialog(
@@ -392,7 +393,7 @@ class _homePageLevelState extends State<HomePageLevel> {
       print("here1: ${event.notification?.body}");
       handleMessageOnMessage(event.data["body"], context);
      });
-    controller =CoverController();
+    controller = CoverController();
     loadWeather();
     }
 
@@ -405,9 +406,18 @@ class _homePageLevelState extends State<HomePageLevel> {
   }
 
   Widget build(BuildContext context) {
-    Firebase.initializeApp();
+    /*
     final databaseReference = FirebaseDatabase.instance.reference();
-
+    databaseReference.child("Cover/Status").once().then((DataSnapshot data) async {
+      cover = int.parse(await data.value);
+      CoverState = int.parse(await data.value) ==0? false: true;
+      log("coverState: $cover");
+      //CoverState = cover == 0 ? false : true;
+    });
+     */
+    Firebase.initializeApp();
+    cover = firebaseData.GetData("Cover");
+    CoverState = cover == 0 ? false : true;
     return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
