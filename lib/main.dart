@@ -54,8 +54,7 @@ bool sunLightNotificationFlag = true;
 int sunLightNotificationVal = 1;
 bool morningNotificationFlag = true;
 int morningNotificationVal = 1;
-bool basketFlag = true;
-int basketVal = 0;
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -127,6 +126,8 @@ class MyApp extends StatelessWidget {
 
 Future<int> GetSettingsStatus() async {
   settings.UpdateCity();
+//  settings.UpdateGooddayAllert();
+//  settings.UpdateAutoCover();
   final databaseReference = FirebaseDatabase.instance.reference();
   return await databaseReference
       .child("Users/$user/Settings/Already set")
@@ -679,13 +680,6 @@ void  ChangeSunLightNoteVal(){
     sunLightNotificationVal = 0;
 }
 
-void  ChangeBasketeVal(){
-  if (basketVal == 0)
-    basketVal = 1;
-  else
-    basketVal = 0;
-}
-
 void SetCoverDataBase(bool position) {
   final databaseReference = FirebaseDatabase.instance.reference();
   if (position) {
@@ -911,7 +905,6 @@ class MyBasketItemPage extends StatefulWidget {
 
 class _MyBasketItemPage extends State<MyBasketItemPage> {
   var basketStatus = 2;
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -937,11 +930,6 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
   }
 
   String GetBasketStatus() {
-    if (basketVal == 0){
-      ChangeBasketeVal();
-      GetBasketStatus();
-    }
-    ChangeBasketeVal();
     basketStatus = firebaseData.GetData("Laundry basket");
 
     if (basketStatus == 0) {
@@ -956,7 +944,6 @@ class _MyBasketItemPage extends State<MyBasketItemPage> {
     if (basketStatus == 3) {
       return "Your basket is full";
     }
-
     return "Your basket is empty";
   }
 }

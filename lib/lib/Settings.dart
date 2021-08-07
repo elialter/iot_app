@@ -68,10 +68,25 @@ class Settings {
   String GetLocation(){
      return this.city;
   }
+   bool GetAutoCover(){
+    return this.autoCover;
+  }
 
   void UpdateCity() {
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("Settings/City").once().then((DataSnapshot data) {
+      this.city = data.value.toString();
+    });
+  }
+  void UpdateAutoCover() {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    databaseReference.child("Settings/Auto cover").once().then((DataSnapshot data) {
+      this.city = data.value.toString();
+    });
+  }
+  void UpdateGooddayAllert() {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    databaseReference.child("Settings/Good day Allert").once().then((DataSnapshot data) {
       this.city = data.value.toString();
     });
   }
