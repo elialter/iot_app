@@ -184,7 +184,12 @@ class _homePageLevelState extends State<HomePageLevel> {
   CoverController controller;
   Widget liteSwitch;
 
-  void handleMessageOnMessage(String field, BuildContext context) {
+  void handleMessageOnMessage(String body, BuildContext context) {
+
+    String field =  parseField (body);
+    int value = int.parse(parseValue (body));
+    //update local data base
+
     switch (field) {
       case "Rain":
         int rain;
@@ -1271,7 +1276,12 @@ Future<void> _messageHandler(RemoteMessage message) async {
   handleMessage(message.data["body"]); //need?
 }
 
-void handleMessage(String field) {
+void handleMessage(String body) {
+
+  String field =  parseField (body);
+  int value = int.parse(parseValue (body));
+  //update local data base
+
   if (field == "Check status"){
       CheckPosibleNotes();
     }
@@ -1614,3 +1624,23 @@ class _ContactUsItemPage extends State<ContactUsItemPage> {
   }
 }
 
+parseField(String body){
+  int place;
+  for(int i=0; i<body.length; i++){
+    if(body[place]=="-"){
+      place =i;
+      break;
+    }
+    return body.substring(0,place-1);
+  }
+}
+parseValue(String body){
+  int place;
+  for(int i=0; i<body.length; i++){
+    if(body[place]=="-"){
+      place =i;
+      break;
+    }
+    return body.substring(place,body.length-1);
+  }
+}
