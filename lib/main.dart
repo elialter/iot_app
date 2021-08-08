@@ -361,6 +361,32 @@ class _homePageLevelState extends State<HomePageLevel> {
               );
             });
         break;
+/*      case "Laundry basket":
+        if(('Yes, when it\'s almost full' == settings.GetBasketCapacityAllert() && firebaseData.GetData("Laundry basket")  >= 2) &&
+    ('Yes, when it\'s totaly full' == settings.GetBasketCapacityAllert() && firebaseData.GetData("Laundry basket")  == 3)){
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              //if cover is open and there are clothes on the line - check database
+              return AlertDialog(
+                  title: Text(
+                    field + " Allert",
+                    textAlign: TextAlign.center,
+                  ),
+                  content: Text(
+                      "Yoe have a lot of laundry in the basket",
+                      textAlign: TextAlign.center),
+                  actions: [
+                    TextButton(
+                      child: Text("  Ok  ", style: TextStyle( color: Colors.black),),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ]
+              );
+            });}
+        break;*/
       case "Morning note":
         showDialog(
             context: context,
@@ -399,6 +425,9 @@ class _homePageLevelState extends State<HomePageLevel> {
     FirebaseMessaging.onMessage.listen((RemoteMessage event) {
       print("here1: ${event.notification?.body}");
       handleMessageOnMessage(event.data["body"], context);
+      firebaseData.GetData("Clothes on line");
+      firebaseData.GetData("Laundry basket");
+      firebaseData.GetData("Sun Light");
      });
     controller = CoverController();
     loadWeather();
@@ -1418,12 +1447,9 @@ String ShowSunLightStatus() {
 
 void CheckClock() async{
   var hour = DateTime.now();
-//  DateTime _myTime;
-//  _myTime = await NTP.now();
-//  int hour = _myTime.hour;
-
+  int clothesStatus = firebaseData.GetData("Clothes on line");
 //  if ((hour.hour == 20) && (nightNotificationFlag)){ // real App
-  if (hour.hour == 20){   // brodcast version
+  if (hour.hour == 18 && clothesStatus == 1){   // brodcast version
     final databaseReference = FirebaseDatabase.instance.reference();
     firebaseData.SetData('Night note', nightNotificationVal);
     databaseReference.child('Night note').update({'Status': nightNotificationVal});
@@ -1431,13 +1457,13 @@ void CheckClock() async{
     nightNotificationFlag = false;
   }
   else{
-    if ((hour.hour != 20))
+    if ((hour.hour != 18))
       nightNotificationFlag = true;
   }
   int allertflag = settings.GoodDayAllert();
 //settings.GetGoodDayAllert();
 //  if ((_myTime.hour == 19) && (morningNotificationFlag) && (allertflag == 1))){ //real app
-  if ((hour.hour == 8) && (allertflag == 1)){   // for brodcast
+  if ((hour.hour == 8) && (allertflag == 1) && clothesStatus == 0){   // for brodcast
     String recomendation = GetRecomendaition();
     if ((recomendation == "Ideal time to hang laundry") || (recomendation == "Good time to hang laundry")) {
       log("Writing to morning not");
@@ -1460,7 +1486,7 @@ void CheckForcast(){
   final databaseReference = FirebaseDatabase.instance.reference();
 //  if ((weatherDataHome.main == "Rain") && (rainNotificationFlag)     //
 //      && (clothesStatus == 1)) {                                    // real App
-  if ((weatherDataHome.main == "Clear") && (clothesStatus == 1)) {     // for brodcast
+  if ((weatherDataHome.main == "Rain") && (clothesStatus == 1)) {     // for brodcast
     firebaseData.SetData('Rain note', rainNotificationVal);
     databaseReference.child('Rain note').update({'Status': rainNotificationVal});
     rainNotificationFlag = false;
@@ -1477,7 +1503,7 @@ void CheckSunLight(){
   int sunlightStatus = firebaseData.GetData("Sun Light");
   final databaseReference = FirebaseDatabase.instance.reference();
   //if ((sunlightStatus >= 3) && (sunLightNotificationFlag)) { // real App line
-  if (sunlightStatus >= 3){ // line for brodcast
+  if (sunlightStatus >= 2 && clothesStatus == 0){ // line for brodcast
     firebaseData.SetData('Sun light note', sunLightNotificationVal);
     databaseReference.child('Sun light note').update({'Status': sunLightNotificationVal});
     sunLightNotificationFlag = false;
