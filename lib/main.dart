@@ -190,12 +190,18 @@ class _homePageLevelState extends State<HomePageLevel> {
         int rain;
         int covered ;
         int clothesOnLine;
+        int autoCover;
         final databaseReference = FirebaseDatabase.instance.reference();
           databaseReference.once().then((DataSnapshot data) {
             rain = data.value["Rain"]["Status"];
             covered = data.value["Cover"]["Status"];
             clothesOnLine = data.value["Clothes on line"]["Status"];
+            autoCover = data.value["Settings"]["Auto cover"];
         if(rain == 1) {
+          if (covered == 0 && clothesOnLine == 1 && autoCover == 1) {
+            SetCoverState(true);
+            return;
+          }
           showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -572,16 +578,6 @@ class _homePageLevelState extends State<HomePageLevel> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => MyBasketItemPage()));
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.schedule),
-                  title: Text('Schedule cover'),
-                  onTap: () {
-                    // Update the state of the app
-                    // ...
-                    // Then close the drawer
-                    Navigator.pop(context);
                   },
                 ),
                 ListTile(
